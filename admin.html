@@ -6,44 +6,166 @@
   <title>Admin · Reservas Facundo</title>
   <style>
     :root {
-      --bg: #f7fbff;
       --ink: #3a4a5c;
       --ink-soft: #6b7c8f;
       --blue: #5a9fd4;
+      --blue-soft: #cfe6f7;
       --soft: #e8f3fb;
       --white: #fdfeff;
+      --rose: #c489a0;
+      --rose-soft: #f7e8ef;
       --shadow: 0 10px 40px rgba(90, 140, 180, 0.12);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-      background: linear-gradient(180deg, #f9fcff 0%, #eef6fc 100%);
+      background:
+        radial-gradient(ellipse 70% 45% at 50% 0%, #e3f1fb 0%, transparent 55%),
+        linear-gradient(180deg, #f9fcff 0%, #eef6fc 100%);
       color: var(--ink);
       min-height: 100vh;
       padding: 28px 18px 60px;
+      line-height: 1.5;
     }
-    .wrap { max-width: 820px; margin: 0 auto; }
-    h1 { font-size: 1.6rem; margin: 8px 0 6px; }
-    p { color: var(--ink-soft); margin-bottom: 18px; }
+    .wrap { max-width: 860px; margin: 0 auto; }
+    .nav {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+      font-size: 0.92rem;
+    }
+    .nav a { color: var(--blue); text-decoration: none; font-weight: 600; }
+    .nav a:hover { text-decoration: underline; }
+    .hero {
+      background: rgba(255,255,255,0.88);
+      border: 1px solid rgba(126,182,224,0.35);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      padding: 22px 20px;
+      margin-bottom: 18px;
+    }
+    .pill {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--blue);
+      background: var(--soft);
+      border: 1px solid var(--blue-soft);
+      padding: 5px 10px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+    h1 {
+      font-family: "Snell Roundhand", "Segoe Script", "Apple Chancery", cursive;
+      font-weight: 400;
+      color: var(--blue);
+      font-size: clamp(1.8rem, 5vw, 2.4rem);
+      line-height: 1.15;
+      margin-bottom: 6px;
+    }
+    .lead { color: var(--ink-soft); margin-bottom: 14px; }
+    .stats-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .stat-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #fff;
+      border: 1px solid rgba(126,182,224,0.35);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      color: var(--ink-soft);
+    }
+    .stat-chip strong { color: var(--blue); font-weight: 800; }
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 16px 0 18px;
+    }
+    .toolbar input {
+      flex: 1;
+      min-width: min(100%, 240px);
+      border: 1.5px solid var(--blue-soft);
+      border-radius: 999px;
+      padding: 12px 16px;
+      font-size: 1rem;
+      outline: none;
+      background: #fff;
+    }
+    .toolbar input:focus { border-color: var(--blue); }
+    .list { display: grid; gap: 12px; }
     .card {
+      display: grid;
+      grid-template-columns: 52px 1fr;
+      gap: 14px;
+      align-items: start;
       background: var(--white);
       border: 1px solid rgba(126, 182, 224, 0.35);
       border-radius: 18px;
       box-shadow: var(--shadow);
-      padding: 18px;
-      margin-bottom: 14px;
+      padding: 16px;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
     }
-    .meta { font-size: 0.85rem; color: var(--ink-soft); margin-top: 6px; }
-    .gift { font-weight: 700; font-size: 1.05rem; }
-    .stats {
-      display: inline-block;
-      background: var(--soft);
-      color: var(--blue);
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 34px rgba(90, 140, 180, 0.16);
+    }
+    .avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: 1rem;
+      color: #fff;
+      background: linear-gradient(145deg, #8fc0e8, #5a9fd4);
+      box-shadow: 0 8px 16px rgba(90,159,212,0.25);
+    }
+    .avatar.alt {
+      background: linear-gradient(145deg, #e8b7c8, #c489a0);
+      box-shadow: 0 8px 16px rgba(196,137,160,0.25);
+    }
+    .gift {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+    .guest {
+      color: var(--ink);
+      font-size: 0.95rem;
+    }
+    .guest a { color: var(--blue); text-decoration: none; }
+    .guest a:hover { text-decoration: underline; }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .tag {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #8a5a72;
+      background: var(--rose-soft);
+      border: 1px solid #ecd0db;
       border-radius: 999px;
-      padding: 8px 14px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      margin-bottom: 16px;
+      padding: 4px 10px;
+    }
+    .tag.time {
+      color: var(--ink-soft);
+      background: var(--soft);
+      border-color: var(--blue-soft);
     }
     .error {
       background: #fff1f1;
@@ -52,17 +174,37 @@
       border-radius: 14px;
       padding: 14px 16px;
     }
-    .empty { color: var(--ink-soft); padding: 20px 0; }
-    a { color: var(--blue); }
+    .empty {
+      text-align: center;
+      color: var(--ink-soft);
+      padding: 36px 16px;
+      background: rgba(255,255,255,0.7);
+      border: 1px dashed var(--blue-soft);
+      border-radius: 18px;
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <p><a href="index.html">← Invitación</a> · <a href="lista.html">Lista</a></p>
-    <h1>Reservas del baby shower</h1>
-    <p>Panel para ver quién se anotó en cada regalo.</p>
-    <div class="stats" id="stats">Cargando…</div>
-    <div id="list"></div>
+    <div class="nav">
+      <a href="index.html">← Invitación</a>
+      <a href="lista.html">Lista de regalos</a>
+    </div>
+
+    <section class="hero">
+      <div class="pill">Baby Shower · Facundo</div>
+      <h1>Reservas</h1>
+      <p class="lead">Quién se anotó en cada regalo, al instante.</p>
+      <div class="stats-row" id="stats">
+        <span class="stat-chip">Cargando…</span>
+      </div>
+    </section>
+
+    <div class="toolbar">
+      <input id="search" type="search" placeholder="Buscar por nombre, correo o regalo…" />
+    </div>
+
+    <div class="list" id="list"></div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -74,15 +216,17 @@
       var key = params.get("key") || "";
       var list = document.getElementById("list");
       var stats = document.getElementById("stats");
+      var search = document.getElementById("search");
+      var rowsCache = [];
 
       if (!cfg.ADMIN_KEY || key !== cfg.ADMIN_KEY) {
-        stats.textContent = "Acceso restringido";
+        stats.innerHTML = '<span class="stat-chip">Acceso restringido</span>';
         list.innerHTML = '<div class="error">Usa la URL con ?key=CLAVE (está en js/config.js → ADMIN_KEY).</div>';
         return;
       }
 
       if (!cfg.SUPABASE_URL || !cfg.SUPABASE_ANON_KEY || cfg.SUPABASE_URL.indexOf("PEGAR_") === 0) {
-        stats.textContent = "Falta configurar Supabase";
+        stats.innerHTML = '<span class="stat-chip">Falta configurar Supabase</span>';
         list.innerHTML = '<div class="error">Completa SUPABASE_URL y SUPABASE_ANON_KEY en js/config.js</div>';
         return;
       }
@@ -91,41 +235,23 @@
 
       function fmtDate(iso) {
         try {
-          return new Date(iso).toLocaleString("es-CL");
+          return new Date(iso).toLocaleString("es-CL", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+          });
         } catch (e) {
           return iso || "";
         }
       }
 
-      async function load() {
-        var res = await supabase
-          .from("reservations")
-          .select("*")
-          .order("created_at", { ascending: false });
-
-        if (res.error) {
-          stats.textContent = "Error";
-          list.innerHTML = '<div class="error">' + res.error.message + "</div>";
-          return;
-        }
-
-        var rows = res.data || [];
-        stats.textContent = rows.length + " reserva" + (rows.length === 1 ? "" : "s");
-
-        if (!rows.length) {
-          list.innerHTML = '<p class="empty">Aún no hay reservas.</p>';
-          return;
-        }
-
-        list.innerHTML = rows.map(function (r) {
-          return (
-            '<article class="card">' +
-              '<div class="gift">' + escapeHtml(r.gift_name) + "</div>" +
-              "<div><strong>" + escapeHtml(r.guest_name) + "</strong> · " + escapeHtml(r.guest_email) + "</div>" +
-              '<div class="meta">' + fmtDate(r.created_at) + " · id: " + escapeHtml(r.gift_id) + "</div>" +
-            "</article>"
-          );
-        }).join("");
+      function initials(name) {
+        var parts = String(name || "?").trim().split(/\s+/).filter(Boolean);
+        if (!parts.length) return "?";
+        if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+        return (parts[0][0] + parts[1][0]).toUpperCase();
       }
 
       function escapeHtml(s) {
@@ -136,6 +262,62 @@
           .replace(/"/g, "&quot;");
       }
 
+      function render(rows) {
+        var q = (search.value || "").toLowerCase().trim();
+        var filtered = !q ? rows : rows.filter(function (r) {
+          var hay = [r.gift_name, r.guest_name, r.guest_email, r.gift_id].join(" ").toLowerCase();
+          return hay.indexOf(q) >= 0;
+        });
+
+        stats.innerHTML =
+          '<span class="stat-chip"><strong>' + rows.length + '</strong> reserva' + (rows.length === 1 ? "" : "s") + '</span>' +
+          (q ? '<span class="stat-chip"><strong>' + filtered.length + '</strong> coinciden</span>' : '');
+
+        if (!rows.length) {
+          list.innerHTML = '<p class="empty">Aún no hay reservas. Cuando alguien se anote, aparecerá aquí.</p>';
+          return;
+        }
+
+        if (!filtered.length) {
+          list.innerHTML = '<p class="empty">No hay coincidencias para esa búsqueda.</p>';
+          return;
+        }
+
+        list.innerHTML = filtered.map(function (r, i) {
+          return (
+            '<article class="card">' +
+              '<div class="avatar' + (i % 2 ? " alt" : "") + '">' + escapeHtml(initials(r.guest_name)) + "</div>" +
+              "<div>" +
+                '<div class="gift">' + escapeHtml(r.gift_name) + "</div>" +
+                '<div class="guest"><strong>' + escapeHtml(r.guest_name) + "</strong> · " +
+                  '<a href="mailto:' + escapeHtml(r.guest_email) + '">' + escapeHtml(r.guest_email) + "</a></div>" +
+                '<div class="meta">' +
+                  '<span class="tag">Reservado</span>' +
+                  '<span class="tag time">' + escapeHtml(fmtDate(r.created_at)) + "</span>" +
+                "</div>" +
+              "</div>" +
+            "</article>"
+          );
+        }).join("");
+      }
+
+      async function load() {
+        var res = await supabase
+          .from("reservations")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (res.error) {
+          stats.innerHTML = '<span class="stat-chip">Error</span>';
+          list.innerHTML = '<div class="error">' + escapeHtml(res.error.message) + "</div>";
+          return;
+        }
+
+        rowsCache = res.data || [];
+        render(rowsCache);
+      }
+
+      search.addEventListener("input", function () { render(rowsCache); });
       load();
       setInterval(load, 15000);
     })();

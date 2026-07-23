@@ -87,37 +87,96 @@
     }
     .toolbar input:focus { border-color: var(--blue-deep); }
     .stats {
-      text-align: center;
-      color: var(--ink-soft);
-      font-size: 0.9rem;
-      margin-bottom: 18px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 20px;
     }
+    .stat-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.9);
+      border: 1px solid rgba(126,182,224,0.35);
+      color: var(--ink-soft);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      box-shadow: 0 4px 14px rgba(90,140,180,0.08);
+    }
+    .stat-chip strong { color: var(--blue-deep); font-weight: 800; }
+    .stat-chip.reserved strong { color: #8a5a72; }
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 14px;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 16px;
     }
     .gift-card {
       position: relative;
-      background: rgba(255,255,255,0.88);
-      border: 1px solid rgba(126,182,224,0.35);
-      border-radius: var(--radius);
-      padding: 18px 16px 16px;
+      overflow: hidden;
+      background:
+        linear-gradient(165deg, rgba(255,255,255,0.96) 0%, rgba(245,251,255,0.92) 100%);
+      border: 1px solid rgba(126,182,224,0.32);
+      border-radius: 20px;
+      padding: 20px 16px 16px;
       box-shadow: var(--shadow);
       display: flex;
       flex-direction: column;
       gap: 8px;
-      min-height: 210px;
+      min-height: 230px;
+      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    }
+    .gift-card::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: linear-gradient(180deg, #8fc0e8, #5a9fd4);
+      opacity: 0.85;
+    }
+    .gift-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 14px 36px rgba(90, 140, 180, 0.16);
+      border-color: rgba(90,159,212,0.45);
     }
     .gift-card.is-reserved {
-      opacity: 0.72;
-      background: #f3f7fb;
+      background:
+        linear-gradient(165deg, #f8f4f6 0%, #f1f5f9 100%);
+      border-color: rgba(180, 150, 165, 0.35);
     }
-    .gift-icon { font-size: 28px; }
+    .gift-card.is-reserved::before {
+      background: linear-gradient(180deg, #e8b7c8, #c489a0);
+    }
+    .gift-card.is-reserved:hover { transform: none; }
+    .gift-card.is-reserved .gift-icon,
+    .gift-card.is-reserved h3,
+    .gift-card.is-reserved .desc,
+    .gift-card.is-reserved .price {
+      opacity: 0.55;
+    }
+    .gift-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      font-size: 22px;
+      background: var(--blue-wash);
+      border: 1px solid var(--blue-soft);
+    }
+    .gift-card.is-reserved .gift-icon {
+      background: #f7e8ef;
+      border-color: #ecd0db;
+    }
     .gift-card h3 {
       font-size: 1.05rem;
       line-height: 1.3;
       color: var(--ink);
+      padding-right: 4px;
     }
     .desc { color: var(--ink-soft); font-size: 0.9rem; flex: 1; }
     .price { font-weight: 700; color: var(--blue-deep); font-size: 0.95rem; }
@@ -140,6 +199,7 @@
       border: none;
       cursor: pointer;
       touch-action: manipulation;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
     .btn-link, .btn-ghost {
       background: #fff;
@@ -151,19 +211,55 @@
       color: #fff;
       box-shadow: 0 8px 18px rgba(90,159,212,0.28);
     }
+    .btn-reserve:hover, .btn-primary:hover { transform: translateY(-1px); }
     .gift-card.is-reserved .btn-reserve { display: none; }
-    .badge {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      background: #f7d6e4;
-      color: #9b4d6d;
+    .gift-card.is-reserved .btn-link {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+    .reserved-panel {
+      display: none;
+      margin-top: 4px;
+      padding: 12px 12px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #faf0f4 0%, #f3e8ee 100%);
+      border: 1px solid #e5c9d5;
+    }
+    .gift-card.is-reserved .reserved-panel { display: block; }
+    .reserved-panel .rp-top {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    .reserved-panel .rp-check {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #c489a0;
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 12px;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    .reserved-panel .rp-label {
       font-size: 11px;
       font-weight: 800;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      padding: 5px 9px;
-      border-radius: 999px;
+      color: #8a5a72;
+    }
+    .reserved-panel .rp-name {
+      font-weight: 700;
+      color: #5c3d4c;
+      font-size: 0.98rem;
+      line-height: 1.25;
+      word-break: break-word;
+    }
+    .badge {
+      display: none;
     }
     .no-link { color: var(--ink-soft); font-size: 0.85rem; padding: 10px 0; }
     footer {
@@ -275,7 +371,10 @@
         <a class="btn-link" href="https://www.relan.cl/products/silla-mecedora-tavia-beige" target="_blank" rel="noopener noreferrer">Ver producto</a>
         <button type="button" class="btn-reserve" data-id="g1-0" data-name="Silla Mecedora Tavia Beige">Reservar</button>
       </div>
-      <div class="badge reserved-badge" hidden>Reservado</div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
     </article>
     <article class="gift-card" data-id="g2-1" data-name="Carrito Organizador Metálico 3 Niveles Blanco">
       <div class="gift-icon">🎁</div>
@@ -286,7 +385,10 @@
         <a class="btn-link" href="https://www.falabella.com/falabella-cl/product/139542986/Carrito-Organizador-Metalico-Con-Asa-Ruedas-3-Niveles-Blanco/139542987" target="_blank" rel="noopener noreferrer">Ver producto</a>
         <button type="button" class="btn-reserve" data-id="g2-1" data-name="Carrito Organizador Metálico 3 Niveles Blanco">Reservar</button>
       </div>
-      <div class="badge reserved-badge" hidden>Reservado</div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
     </article>
     <article class="gift-card" data-id="g3-2" data-name="Colchón de Cuna 70 x 130 x 12 cm">
       <div class="gift-icon">🎁</div>
@@ -297,7 +399,10 @@
         <a class="btn-link" href="https://drimkip.cl/colchon-de-cuna-70-x-130-x-12cm.html" target="_blank" rel="noopener noreferrer">Ver producto</a>
         <button type="button" class="btn-reserve" data-id="g3-2" data-name="Colchón de Cuna 70 x 130 x 12 cm">Reservar</button>
       </div>
-      <div class="badge reserved-badge" hidden>Reservado</div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
     </article>
     <article class="gift-card" data-id="g4-3" data-name="Sábanas 300 Hilos Cuna Evolutiva 70x140 cm - Blanco">
       <div class="gift-icon">🎁</div>
@@ -308,7 +413,10 @@
         <a class="btn-link" href="https://www.carestino.cl/producto/sabanas-300-hilos-para-cuna-evolutiva-de-70x140cm-blanco/" target="_blank" rel="noopener noreferrer">Ver producto</a>
         <button type="button" class="btn-reserve" data-id="g4-3" data-name="Sábanas 300 Hilos Cuna Evolutiva 70x140 cm - Blanco">Reservar</button>
       </div>
-      <div class="badge reserved-badge" hidden>Reservado</div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
     </article>
     <article class="gift-card" data-id="g5-4" data-name="Set cuna colecho">
       <div class="gift-icon">🎁</div>
@@ -319,7 +427,10 @@
         <a class="btn-link" href="https://www.mercadolibre.cl/p/MLC66949598?matt_tool=94515950&amp;pdp_filters=item_id:MLC3951906738&amp;ua=B9zOXpOk2dRNNHufD0fdlZmi0FWVMcxB3pMU7La9ZvOCgPC8#origin=share&amp;sid=share&amp;wid=MLC3951906738&amp;action=whatsapp" target="_blank" rel="noopener noreferrer">Ver producto</a>
         <button type="button" class="btn-reserve" data-id="g5-4" data-name="Set cuna colecho">Reservar</button>
       </div>
-      <div class="badge reserved-badge" hidden>Reservado</div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
     </article>
     <article class="gift-card" data-id="g6-5" data-name="Set 2 Sacaleche / Extractor de Leche Materna con Control Remoto + 10 Bolsas">
       <div class="gift-icon">🎁</div>
@@ -330,7 +441,10 @@
         <a class="btn-link" href="https://bebesit.cl/products/set-2-sacaleche-extractor-leche-materna-control-remoto-10-bolsas" target="_blank" rel="noopener noreferrer">Ver producto</a>
         <button type="button" class="btn-reserve" data-id="g6-5" data-name="Set 2 Sacaleche / Extractor de Leche Materna con Control Remoto + 10 Bolsas">Reservar</button>
       </div>
-      <div class="badge reserved-badge" hidden>Reservado</div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
     </article>
     <article class="gift-card" data-id="g7-6" data-name="Monitor Digital Portátil">
       <div class="gift-icon">🎁</div>
@@ -341,7 +455,10 @@
         <a class="btn-link" href="https://bebesit.cl/products/monitor-digital-portatil" target="_blank" rel="noopener noreferrer">Ver producto</a>
         <button type="button" class="btn-reserve" data-id="g7-6" data-name="Monitor Digital Portátil">Reservar</button>
       </div>
-      <div class="badge reserved-badge" hidden>Reservado</div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
     </article>
     <article class="gift-card" data-id="g8-7" data-name="Porta Bebé B009R Gris">
       <div class="gift-icon">🎁</div>
@@ -352,7 +469,10 @@
         <a class="btn-link" href="https://www.baby-planet.cl/products/porta-bebe-b009r-grey" target="_blank" rel="noopener noreferrer">Ver producto</a>
         <button type="button" class="btn-reserve" data-id="g8-7" data-name="Porta Bebé B009R Gris">Reservar</button>
       </div>
-      <div class="badge reserved-badge" hidden>Reservado</div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
     </article>
     <article class="gift-card" data-id="g9-8" data-name="Mudador Portátil">
       <div class="gift-icon">🎁</div>
@@ -363,7 +483,10 @@
         <a class="btn-link" href="https://www.simplegracia.cl/products/mudador-portatil" target="_blank" rel="noopener noreferrer">Ver producto</a>
         <button type="button" class="btn-reserve" data-id="g9-8" data-name="Mudador Portátil">Reservar</button>
       </div>
-      <div class="badge reserved-badge" hidden>Reservado</div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
     </article>
     <article class="gift-card" data-id="g10-9" data-name="Bolso Maternal Premium Black Gold">
       <div class="gift-icon">🎁</div>
@@ -374,7 +497,10 @@
         <a class="btn-link" href="https://www.falabella.com/falabella-cl/product/149733952/bolso-maternal-premium-black-gold/149733953" target="_blank" rel="noopener noreferrer">Ver producto</a>
         <button type="button" class="btn-reserve" data-id="g10-9" data-name="Bolso Maternal Premium Black Gold">Reservar</button>
       </div>
-      <div class="badge reserved-badge" hidden>Reservado</div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
     </article>
     <article class="gift-card" data-id="g11-10" data-name="Set de tutos">
       <div class="gift-icon">🎁</div>
@@ -385,7 +511,10 @@
         <a class="btn-link" href="https://www.mercadolibre.cl/up/MLCU2465876591?matt_tool=94515950&amp;pdp_filters=item_id:MLC2747915966&amp;ua=j8pRcmUQSLOSCghFQDD2AVh7iYa7jC8dYCUQDNPZFeCubKHm#origin=share&amp;sid=share&amp;wid=MLC2747915966&amp;action=whatsapp" target="_blank" rel="noopener noreferrer">Ver producto</a>
         <button type="button" class="btn-reserve" data-id="g11-10" data-name="Set de tutos">Reservar</button>
       </div>
-      <div class="badge reserved-badge" hidden>Reservado</div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
     </article>
     <article class="gift-card" data-id="g12-11" data-name="Manta de Algodón Café">
       <div class="gift-icon">🎁</div>
@@ -396,7 +525,10 @@
         <a class="btn-link" href="https://www.falabella.com/falabella-cl/product/148487017/manta-algodon-cafe/149835148" target="_blank" rel="noopener noreferrer">Ver producto</a>
         <button type="button" class="btn-reserve" data-id="g12-11" data-name="Manta de Algodón Café">Reservar</button>
       </div>
-      <div class="badge reserved-badge" hidden>Reservado</div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
     </article>
     <article class="gift-card" data-id="g13-12" data-name="Set de tutos">
       <div class="gift-icon">🎁</div>
@@ -407,7 +539,10 @@
         <a class="btn-link" href="https://www.mercadolibre.cl/p/MLC62526330?attributes=PATTERN_NAME:MLC65971669,COLOR:MLC62526330&amp;matt_tool=94515950&amp;pdp_filters=item_id:MLC1766382955&amp;ua=eamZgWlr3bKhL-M95dN4sUZki0E9sB16ATTw9MZF_iWelGnE#origin=share&amp;sid=share&amp;wid=MLC1766382955&amp;action=whatsapp" target="_blank" rel="noopener noreferrer">Ver producto</a>
         <button type="button" class="btn-reserve" data-id="g13-12" data-name="Set de tutos">Reservar</button>
       </div>
-      <div class="badge reserved-badge" hidden>Reservado</div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
     </article>
     <article class="gift-card" data-id="g14-13" data-name="Pack de Baberos">
       <div class="gift-icon">🎁</div>
@@ -418,7 +553,10 @@
         <a class="btn-link" href="https://www.mercadolibre.cl/p/MLC65124676?matt_tool=94515950&amp;pdp_filters=item_id:MLC3553346636&amp;ua=U_tmyNxeuCcCok2-SmmGtaF6p3qSsTyI47Vfw3L8IQVpCndh#origin=share&amp;sid=share&amp;wid=MLC3553346636&amp;action=whatsapp" target="_blank" rel="noopener noreferrer">Ver producto</a>
         <button type="button" class="btn-reserve" data-id="g14-13" data-name="Pack de Baberos">Reservar</button>
       </div>
-      <div class="badge reserved-badge" hidden>Reservado</div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
     </article>
     <article class="gift-card" data-id="g15-14" data-name="Cobertor de cuna">
       <div class="gift-icon">🎁</div>
@@ -429,7 +567,10 @@
         <a class="btn-link" href="https://www.mercadolibre.cl/up/MLCU3556047941?matt_tool=94515950&amp;pdp_filters=item_id:MLC3332335336&amp;ua=FKE0BzVQ7T5GNRHPGqIE6k-osu9n0-GmcxMzPq08za_XwuRD#origin=share&amp;sid=share&amp;wid=MLC3332335336&amp;action=whatsapp" target="_blank" rel="noopener noreferrer">Ver producto</a>
         <button type="button" class="btn-reserve" data-id="g15-14" data-name="Cobertor de cuna">Reservar</button>
       </div>
-      <div class="badge reserved-badge" hidden>Reservado</div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
     </article>
     <article class="gift-card" data-id="g16-15" data-name="Manta / Frazada Polar para Bebés">
       <div class="gift-icon">🎁</div>
@@ -440,7 +581,10 @@
         <a class="btn-link" href="https://www.falabella.com/falabella-cl/product/147969186/Manta-Frazada-Cobija-Polar-Para-Bebes/147969189" target="_blank" rel="noopener noreferrer">Ver producto</a>
         <button type="button" class="btn-reserve" data-id="g16-15" data-name="Manta / Frazada Polar para Bebés">Reservar</button>
       </div>
-      <div class="badge reserved-badge" hidden>Reservado</div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
     </article>
     <article class="gift-card" data-id="g17-16" data-name="Manta Regalería Niño Celeste">
       <div class="gift-icon">🎁</div>
@@ -451,7 +595,10 @@
         <a class="btn-link" href="https://www.opaline.cl/manta-regaleria-nino-celeste-mnpl0340i25/p" target="_blank" rel="noopener noreferrer">Ver producto</a>
         <button type="button" class="btn-reserve" data-id="g17-16" data-name="Manta Regalería Niño Celeste">Reservar</button>
       </div>
-      <div class="badge reserved-badge" hidden>Reservado</div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
     </article>
     <article class="gift-card" data-id="g18-17" data-name="Saco de Dormir Unisex">
       <div class="gift-icon">🎁</div>
@@ -462,7 +609,10 @@
         <a class="btn-link" href="https://www.opaline.cl/saco-de-dormir-unisex/p" target="_blank" rel="noopener noreferrer">Ver producto</a>
         <button type="button" class="btn-reserve" data-id="g18-17" data-name="Saco de Dormir Unisex">Reservar</button>
       </div>
-      <div class="badge reserved-badge" hidden>Reservado</div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
     </article>
     <article class="gift-card" data-id="g19-18" data-name="Pack de toallas de baño">
       <div class="gift-icon">🎁</div>
@@ -473,7 +623,10 @@
         <a class="btn-link" href="https://www.mercadolibre.cl/up/MLCU4141102446?matt_tool=94515950&amp;pdp_filters=item_id:MLC2013912027&amp;ua=fPaCkSJSsw3M7-iXxUoMlxc1gp96YiBRWIM2eLXrqBj706fr#origin=share&amp;sid=share&amp;wid=MLC2013912027&amp;action=whatsapp" target="_blank" rel="noopener noreferrer">Ver producto</a>
         <button type="button" class="btn-reserve" data-id="g19-18" data-name="Pack de toallas de baño">Reservar</button>
       </div>
-      <div class="badge reserved-badge" hidden>Reservado</div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
     </article>
     <article class="gift-card" data-id="g20-19" data-name="Protecto Cama">
       <div class="gift-icon">🎁</div>
@@ -484,7 +637,10 @@
         <a class="btn-link" href="https://www.mercadolibre.cl/up/MLCU4026952279?matt_tool=94515950&amp;pdp_filters=item_id:MLC4034285808&amp;ua=fg7_dyR7qS0ehi-yORCQ5zal5KDvTz0bYkuGNrh1Bdrcy53S#origin=share&amp;sid=share&amp;wid=MLC4034285808&amp;action=whatsapp" target="_blank" rel="noopener noreferrer">Ver producto</a>
         <button type="button" class="btn-reserve" data-id="g20-19" data-name="Protecto Cama">Reservar</button>
       </div>
-      <div class="badge reserved-badge" hidden>Reservado</div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
     </article>
     <article class="gift-card" data-id="g21-20" data-name="Cojín de lactancia">
       <div class="gift-icon">🎁</div>
@@ -495,7 +651,10 @@
         <a class="btn-link" href="https://www.mercadolibre.cl/up/MLCU4010784599?matt_tool=94515950&amp;pdp_filters=item_id:MLC1976973383&amp;ua=Xa6JbuUG224R5DoBiQWojNK25RNNRCX3_VLbfYm7vAx1OWi6#origin=share&amp;sid=share&amp;wid=MLC1976973383&amp;action=whatsapp" target="_blank" rel="noopener noreferrer">Ver producto</a>
         <button type="button" class="btn-reserve" data-id="g21-20" data-name="Cojín de lactancia">Reservar</button>
       </div>
-      <div class="badge reserved-badge" hidden>Reservado</div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
     </article>
     <article class="gift-card" data-id="g22-21" data-name="Mamadera">
       <div class="gift-icon">🎁</div>
@@ -506,7 +665,10 @@
         <a class="btn-link" href="https://www.mercadolibre.cl/p/MLC29164190?matt_tool=94515950&amp;pdp_filters=item_id:MLC4085080602&amp;ua=nhLqsAXbIzTGZ71W7A6NGPLZiKvgjUhGbyDkgti5nmKeO4V5#origin=share&amp;sid=share&amp;wid=MLC4085080602&amp;action=whatsapp" target="_blank" rel="noopener noreferrer">Ver producto</a>
         <button type="button" class="btn-reserve" data-id="g22-21" data-name="Mamadera">Reservar</button>
       </div>
-      <div class="badge reserved-badge" hidden>Reservado</div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
     </article>
     <article class="gift-card" data-id="g23-22" data-name="Aspirador Nasal Eléctrico para Bebé (Saca Mocos)">
       <div class="gift-icon">🎁</div>
@@ -517,7 +679,10 @@
         <a class="btn-link" href="https://www.falabella.com/falabella-cl/product/140928208/Aspirador-Nasal-Para-Bebe-Saca-Mocos-Electrico-Limpiador/140928209" target="_blank" rel="noopener noreferrer">Ver producto</a>
         <button type="button" class="btn-reserve" data-id="g23-22" data-name="Aspirador Nasal Eléctrico para Bebé (Saca Mocos)">Reservar</button>
       </div>
-      <div class="badge reserved-badge" hidden>Reservado</div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
     </article>
     <article class="gift-card" data-id="g24-23" data-name="Lima de uñas de bebé">
       <div class="gift-icon">🎁</div>
@@ -528,7 +693,10 @@
         <a class="btn-link" href="https://www.mercadolibre.cl/p/MLC41552105?matt_tool=94515950&amp;pdp_filters=item_id:MLC3037581468&amp;ua=KEjGmAJz56i5H-LqZGYwoUBC-B15F7jeZ8QNbFZV8_rzi3F2#origin=share&amp;sid=share&amp;wid=MLC3037581468&amp;action=whatsapp" target="_blank" rel="noopener noreferrer">Ver producto</a>
         <button type="button" class="btn-reserve" data-id="g24-23" data-name="Lima de uñas de bebé">Reservar</button>
       </div>
-      <div class="badge reserved-badge" hidden>Reservado</div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
     </article>
     <article class="gift-card" data-id="g25-24" data-name="Juego de Sábanas Cuna Colecho Bebé">
       <div class="gift-icon">🎁</div>
@@ -539,7 +707,10 @@
         <a class="btn-link" href="https://www.falabella.com/falabella-cl/product/137955281/Juego-de-sabana-cuna-colecho-bebe/137955282" target="_blank" rel="noopener noreferrer">Ver producto</a>
         <button type="button" class="btn-reserve" data-id="g25-24" data-name="Juego de Sábanas Cuna Colecho Bebé">Reservar</button>
       </div>
-      <div class="badge reserved-badge" hidden>Reservado</div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
     </article>
     <article class="gift-card" data-id="g26-25" data-name="Bee Bee Juego de Sábanas Colecho Punto Beige">
       <div class="gift-icon">🎁</div>
@@ -550,7 +721,10 @@
         <a class="btn-link" href="https://www.falabella.com/falabella-cl/product/16379704/Bee-Bee-Juego-Sabanas-Colecho-Punto-Beige/16379704" target="_blank" rel="noopener noreferrer">Ver producto</a>
         <button type="button" class="btn-reserve" data-id="g26-25" data-name="Bee Bee Juego de Sábanas Colecho Punto Beige">Reservar</button>
       </div>
-      <div class="badge reserved-badge" hidden>Reservado</div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
     </article>
     <article class="gift-card" data-id="g27-26" data-name="Juego de Sábanas Colecho Estrellas Grises">
       <div class="gift-icon">🎁</div>
@@ -561,7 +735,10 @@
         <a class="btn-link" href="https://www.falabella.com/falabella-cl/product/128374413/JUEGO-DE-SABANAS-COLECHO-ESTRELLAS-GRISES/128374414" target="_blank" rel="noopener noreferrer">Ver producto</a>
         <button type="button" class="btn-reserve" data-id="g27-26" data-name="Juego de Sábanas Colecho Estrellas Grises">Reservar</button>
       </div>
-      <div class="badge reserved-badge" hidden>Reservado</div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
     </article>
     <article class="gift-card" data-id="g28-27" data-name="Sábanas 300 Hilos Cuna Evolutiva 70x140 cm - Beige">
       <div class="gift-icon">🎁</div>
@@ -572,7 +749,10 @@
         <a class="btn-link" href="https://www.carestino.cl/producto/sabanas-300-hilos-para-cuna-evolutiva-de-70x140cm-beige/" target="_blank" rel="noopener noreferrer">Ver producto</a>
         <button type="button" class="btn-reserve" data-id="g28-27" data-name="Sábanas 300 Hilos Cuna Evolutiva 70x140 cm - Beige">Reservar</button>
       </div>
-      <div class="badge reserved-badge" hidden>Reservado</div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
     </article>
     <article class="gift-card" data-id="g29-28" data-name="Chupete Ultra Soft 0-6 Niño Philips Avent">
       <div class="gift-icon">🎁</div>
@@ -583,7 +763,10 @@
         <a class="btn-link" href="https://www.falabella.com/falabella-cl/product/146246576/Chupete-Ultra-Soft-0-6-Nino-Philips-Avent/146246577" target="_blank" rel="noopener noreferrer">Ver producto</a>
         <button type="button" class="btn-reserve" data-id="g29-28" data-name="Chupete Ultra Soft 0-6 Niño Philips Avent">Reservar</button>
       </div>
-      <div class="badge reserved-badge" hidden>Reservado</div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
     </article>
     <article class="gift-card" data-id="g30-29" data-name="Pack x3 Tutos de Algodón Bebesit">
       <div class="gift-icon">🎁</div>
@@ -594,7 +777,10 @@
         <a class="btn-link" href="https://www.falabella.com/falabella-cl/product/80759469/pack-x3-tutos-algodon-bebesit/80759469" target="_blank" rel="noopener noreferrer">Ver producto</a>
         <button type="button" class="btn-reserve" data-id="g30-29" data-name="Pack x3 Tutos de Algodón Bebesit">Reservar</button>
       </div>
-      <div class="badge reserved-badge" hidden>Reservado</div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
     </article>
     <article class="gift-card" data-id="g31-30" data-name="Pañales Talla RN">
       <div class="gift-icon">🎁</div>
@@ -605,7 +791,10 @@
         <span class="no-link">Sin link aún</span>
         <button type="button" class="btn-reserve" data-id="g31-30" data-name="Pañales Talla RN">Reservar</button>
       </div>
-      <div class="badge reserved-badge" hidden>Reservado</div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
     </article>
     <article class="gift-card" data-id="g32-31" data-name="Pañales Talla P1">
       <div class="gift-icon">🎁</div>
@@ -616,7 +805,10 @@
         <span class="no-link">Sin link aún</span>
         <button type="button" class="btn-reserve" data-id="g32-31" data-name="Pañales Talla P1">Reservar</button>
       </div>
-      <div class="badge reserved-badge" hidden>Reservado</div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
     </article>
     <article class="gift-card" data-id="g33-32" data-name="Pañales Talla P2">
       <div class="gift-icon">🎁</div>
@@ -627,7 +819,10 @@
         <span class="no-link">Sin link aún</span>
         <button type="button" class="btn-reserve" data-id="g33-32" data-name="Pañales Talla P2">Reservar</button>
       </div>
-      <div class="badge reserved-badge" hidden>Reservado</div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
     </article>
     <article class="gift-card" data-id="g34-33" data-name="Pañales Talla P3">
       <div class="gift-icon">🎁</div>
@@ -638,7 +833,10 @@
         <span class="no-link">Sin link aún</span>
         <button type="button" class="btn-reserve" data-id="g34-33" data-name="Pañales Talla P3">Reservar</button>
       </div>
-      <div class="badge reserved-badge" hidden>Reservado</div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
     </article>
     <article class="gift-card" data-id="g35-34" data-name="Pañales Talla P3">
       <div class="gift-icon">🎁</div>
@@ -649,7 +847,10 @@
         <span class="no-link">Sin link aún</span>
         <button type="button" class="btn-reserve" data-id="g35-34" data-name="Pañales Talla P3">Reservar</button>
       </div>
-      <div class="badge reserved-badge" hidden>Reservado</div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
     </article>
     </section>
 
@@ -721,23 +922,26 @@
         cards.forEach(function (card) {
           var id = card.getAttribute('data-id');
           var res = reservationMap[id];
-          var badge = card.querySelector('.reserved-badge');
+          var panel = card.querySelector('.reserved-badge');
+          var nameEl = panel ? panel.querySelector('.rp-name') : null;
           if (res) {
             reservedCount += 1;
             card.classList.add('is-reserved');
-            badge.hidden = false;
-            badge.textContent = 'Reservado por ' + (res.guest_name || res.name || 'alguien');
+            if (panel) panel.hidden = false;
+            if (nameEl) nameEl.textContent = res.guest_name || res.name || 'Alguien especial';
           } else {
             card.classList.remove('is-reserved');
-            badge.hidden = true;
+            if (panel) panel.hidden = true;
+            if (nameEl) nameEl.textContent = '';
           }
         });
-        var base = (cards.length - reservedCount) + ' disponibles · ' + reservedCount + ' reservados · ' + cards.length + ' en total';
-        if (!configReady()) {
-          stats.textContent = base + ' · (faltan keys en js/config.js)';
-        } else {
-          stats.textContent = base;
-        }
+        var available = cards.length - reservedCount;
+        var warn = configReady() ? '' : ' <span class="stat-chip">Config pendiente</span>';
+        stats.innerHTML =
+          '<span class="stat-chip"><strong>' + available + '</strong> disponibles</span>' +
+          '<span class="stat-chip reserved"><strong>' + reservedCount + '</strong> reservados</span>' +
+          '<span class="stat-chip"><strong>' + cards.length + '</strong> en total</span>' +
+          warn;
       }
 
       async function refreshReservations() {
