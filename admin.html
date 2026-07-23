@@ -167,6 +167,52 @@
       background: var(--soft);
       border-color: var(--blue-soft);
     }
+    .card-body { min-width: 0; }
+    .card-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .btn-delete {
+      flex-shrink: 0;
+      border: 1.5px solid #f0c2c2;
+      background: #fff7f7;
+      color: #b42318;
+      font-weight: 700;
+      font-size: 0.82rem;
+      border-radius: 999px;
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: background 0.15s ease, transform 0.15s ease;
+    }
+    .btn-delete:hover {
+      background: #ffe8e8;
+      transform: translateY(-1px);
+    }
+    .btn-delete:disabled {
+      opacity: 0.6;
+      cursor: wait;
+      transform: none;
+    }
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      transform: translateX(-50%);
+      background: #3a4a5c;
+      color: #fff;
+      padding: 12px 16px;
+      border-radius: 999px;
+      font-size: 0.92rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s ease;
+      z-index: 60;
+      max-width: 90vw;
+      text-align: center;
+    }
+    .toast.show { opacity: 1; }
     .error {
       background: #fff1f1;
       color: #9b2c2c;
@@ -206,6 +252,7 @@
 
     <div class="list" id="list"></div>
   </div>
+  <div class="toast" id="toast"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/config.js"></script>
@@ -217,7 +264,14 @@
       var list = document.getElementById("list");
       var stats = document.getElementById("stats");
       var search = document.getElementById("search");
+      var toast = document.getElementById("toast");
       var rowsCache = [];
+
+      function showToast(text) {
+        toast.textContent = text;
+        toast.classList.add("show");
+        setTimeout(function () { toast.classList.remove("show"); }, 2400);
+      }
 
       if (!cfg.ADMIN_KEY || key !== cfg.ADMIN_KEY) {
         stats.innerHTML = '<span class="stat-chip">Acceso restringido</span>';
@@ -285,10 +339,13 @@
 
         list.innerHTML = filtered.map(function (r, i) {
           return (
-            '<article class="card">' +
+            '<article class="card" data-gift-id="' + escapeHtml(r.gift_id) + '">' +
               '<div class="avatar' + (i % 2 ? " alt" : "") + '">' + escapeHtml(initials(r.guest_name)) + "</div>" +
-              "<div>" +
-                '<div class="gift">' + escapeHtml(r.gift_name) + "</div>" +
+              '<div class="card-body">' +
+                '<div class="card-head">' +
+                  '<div class="gift">' + escapeHtml(r.gift_name) + "</div>" +
+                  '<button type="button" class="btn-delete" data-gift-id="' + escapeHtml(r.gift_id) + '" data-gift-name="' + escapeHtml(r.gift_name) + '">Eliminar</button>' +
+                "</div>" +
                 '<div class="guest"><strong>' + escapeHtml(r.guest_name) + "</strong> · " +
                   '<a href="mailto:' + escapeHtml(r.guest_email) + '">' + escapeHtml(r.guest_email) + "</a></div>" +
                 '<div class="meta">' +
@@ -300,6 +357,38 @@
           );
         }).join("");
       }
+
+      async function deleteReservation(giftId, giftName, btn) {
+        var ok = window.confirm(
+          '¿Eliminar la reserva de "' + giftName + '"?\n\nEl regalo volverá a quedar disponible en la lista.'
+        );
+        if (!ok) return;
+
+        if (btn) {
+          btn.disabled = true;
+          btn.textContent = "Eliminando…";
+        }
+
+        var res = await supabase.from("reservations").delete().eq("gift_id", giftId);
+        if (res.error) {
+          showToast("No se pudo eliminar: " + res.error.message);
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = "Eliminar";
+          }
+          return;
+        }
+
+        rowsCache = rowsCache.filter(function (r) { return r.gift_id !== giftId; });
+        render(rowsCache);
+        showToast("Reserva eliminada. El regalo quedó libre.");
+      }
+
+      list.addEventListener("click", function (e) {
+        var btn = e.target.closest(".btn-delete");
+        if (!btn) return;
+        deleteReservation(btn.getAttribute("data-gift-id"), btn.getAttribute("data-gift-name") || "este regalo", btn);
+      });
 
       async function load() {
         var res = await supabase

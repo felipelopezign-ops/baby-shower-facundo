@@ -24,4 +24,10 @@ create policy "Public insert reservations"
   to anon, authenticated
   with check (true);
 
--- Sin update/delete para anon: el regalo queda bloqueado.
+-- Permite liberar reservas desde el panel admin (pruebas / errores).
+drop policy if exists "Public delete reservations" on public.reservations;
+create policy "Public delete reservations"
+  on public.reservations
+  for delete
+  to anon, authenticated
+  using (true);
