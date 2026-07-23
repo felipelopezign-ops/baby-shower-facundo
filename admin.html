@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin · Reservas Facundo</title>
+  <style>
+    :root {
+      --bg: #f7fbff;
+      --ink: #3a4a5c;
+      --ink-soft: #6b7c8f;
+      --blue: #5a9fd4;
+      --soft: #e8f3fb;
+      --white: #fdfeff;
+      --shadow: 0 10px 40px rgba(90, 140, 180, 0.12);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(180deg, #f9fcff 0%, #eef6fc 100%);
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 28px 18px 60px;
+    }
+    .wrap { max-width: 820px; margin: 0 auto; }
+    h1 { font-size: 1.6rem; margin: 8px 0 6px; }
+    p { color: var(--ink-soft); margin-bottom: 18px; }
+    .card {
+      background: var(--white);
+      border: 1px solid rgba(126, 182, 224, 0.35);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 18px;
+      margin-bottom: 14px;
+    }
+    .meta { font-size: 0.85rem; color: var(--ink-soft); margin-top: 6px; }
+    .gift { font-weight: 700; font-size: 1.05rem; }
+    .stats {
+      display: inline-block;
+      background: var(--soft);
+      color: var(--blue);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    .error {
+      background: #fff1f1;
+      color: #9b2c2c;
+      border: 1px solid #f5c2c2;
+      border-radius: 14px;
+      padding: 14px 16px;
+    }
+    .empty { color: var(--ink-soft); padding: 20px 0; }
+    a { color: var(--blue); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p><a href="index.html">← Invitación</a> · <a href="lista.html">Lista</a></p>
+    <h1>Reservas del baby shower</h1>
+    <p>Panel para ver quién se anotó en cada regalo.</p>
+    <div class="stats" id="stats">Cargando…</div>
+    <div id="list"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script>
+    (function () {
+      var cfg = window.BABY_SHOWER_CONFIG || {};
+      var params = new URLSearchParams(location.search);
+      var key = params.get("key") || "";
+      var list = document.getElementById("list");
+      var stats = document.getElementById("stats");
+
+      if (!cfg.ADMIN_KEY || key !== cfg.ADMIN_KEY) {
+        stats.textContent = "Acceso restringido";
+        list.innerHTML = '<div class="error">Usa la URL con ?key=CLAVE (está en js/config.js → ADMIN_KEY).</div>';
+        return;
+      }
+
+      if (!cfg.SUPABASE_URL || !cfg.SUPABASE_ANON_KEY || cfg.SUPABASE_URL.indexOf("PEGAR_") === 0) {
+        stats.textContent = "Falta configurar Supabase";
+        list.innerHTML = '<div class="error">Completa SUPABASE_URL y SUPABASE_ANON_KEY en js/config.js</div>';
+        return;
+      }
+
+      var supabase = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
+
+      function fmtDate(iso) {
+        try {
+          return new Date(iso).toLocaleString("es-CL");
+        } catch (e) {
+          return iso || "";
+        }
+      }
+
+      async function load() {
+        var res = await supabase
+          .from("reservations")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (res.error) {
+          stats.textContent = "Error";
+          list.innerHTML = '<div class="error">' + res.error.message + "</div>";
+          return;
+        }
+
+        var rows = res.data || [];
+        stats.textContent = rows.length + " reserva" + (rows.length === 1 ? "" : "s");
+
+        if (!rows.length) {
+          list.innerHTML = '<p class="empty">Aún no hay reservas.</p>';
+          return;
+        }
+
+        list.innerHTML = rows.map(function (r) {
+          return (
+            '<article class="card">' +
+              '<div class="gift">' + escapeHtml(r.gift_name) + "</div>" +
+              "<div><strong>" + escapeHtml(r.guest_name) + "</strong> · " + escapeHtml(r.guest_email) + "</div>" +
+              '<div class="meta">' + fmtDate(r.created_at) + " · id: " + escapeHtml(r.gift_id) + "</div>" +
+            "</article>"
+          );
+        }).join("");
+      }
+
+      function escapeHtml(s) {
+        return String(s || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      load();
+      setInterval(load, 15000);
+    })();
+  </script>
+</body>
+</html>
