@@ -369,13 +369,29 @@
           btn.textContent = "Eliminando…";
         }
 
-        var res = await supabase.from("reservations").delete().eq("gift_id", giftId);
+        // .select() confirma que RLS permitió borrar filas (si no, data viene vacío)
+        var res = await supabase
+          .from("reservations")
+          .delete()
+          .eq("gift_id", giftId)
+          .select("gift_id");
+
         if (res.error) {
           showToast("No se pudo eliminar: " + res.error.message);
           if (btn) {
             btn.disabled = false;
             btn.textContent = "Eliminar";
           }
+          return;
+        }
+
+        if (!res.data || !res.data.length) {
+          showToast("Supabase bloqueó el borrado. Corre add-delete-policy.sql en el SQL Editor.");
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = "Eliminar";
+          }
+          await load();
           return;
         }
 
