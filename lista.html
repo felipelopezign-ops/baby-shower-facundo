@@ -1,791 +1,104 @@
 <!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Lista Secreta · Bebé Facundo</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
   <style>
-    :root {
-      --bg: #f7fbff;
-      --ink: #3a4a5c;
-      --ink-soft: #6b7c8f;
-      --blue: #7eb6e0;
-      --blue-deep: #5a9fd4;
-      --blue-soft: #cfe6f7;
-      --blue-wash: #e8f3fb;
-      --shadow: 0 10px 40px rgba(90, 140, 180, 0.12);
-      --radius: 18px;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-      color: var(--ink);
-      background:
-        radial-gradient(ellipse 80% 50% at 50% 0%, #e3f1fb 0%, transparent 60%),
-        linear-gradient(180deg, #f9fcff 0%, #eef6fc 40%, #f7fbff 100%);
-      min-height: 100vh;
-      line-height: 1.5;
-    }
-    .wrap { max-width: 920px; margin: 0 auto; padding: 28px 18px 80px; }
-    header {
-      text-align: center;
-      padding: 28px 12px 20px;
-    }
-    .pill {
-      display: inline-block;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--blue-deep);
-      background: var(--blue-wash);
-      border: 1px solid var(--blue-soft);
-      padding: 6px 12px;
-      border-radius: 999px;
-      margin-bottom: 14px;
-    }
-    h1 {
-      font-family: "Snell Roundhand", "Segoe Script", "Apple Chancery", cursive;
-      font-weight: 400;
-      color: var(--blue-deep);
-      font-size: clamp(2rem, 7vw, 2.8rem);
-      line-height: 1.15;
-      margin-bottom: 8px;
-    }
-    .lead {
-      color: var(--ink-soft);
-      max-width: 28em;
-      margin: 0 auto 10px;
-      font-size: 1.02rem;
-    }
-    .note {
-      max-width: 34em;
-      margin: 16px auto 0;
-      background: rgba(255,255,255,0.8);
-      border: 1px solid var(--blue-soft);
-      border-radius: 16px;
-      padding: 14px 16px;
-      color: var(--ink-soft);
-      font-size: 0.95rem;
-      box-shadow: var(--shadow);
-    }
-    .toolbar {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      justify-content: center;
-      margin: 22px 0 8px;
-    }
-    .toolbar input {
-      min-width: min(100%, 280px);
-      border: 1.5px solid var(--blue-soft);
-      border-radius: 999px;
-      padding: 12px 16px;
-      font-size: 1rem;
-      outline: none;
-      background: #fff;
-    }
-    .toolbar input:focus { border-color: var(--blue-deep); }
-    .stats {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      justify-content: center;
-      margin-bottom: 20px;
-    }
-    .stat-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(255,255,255,0.9);
-      border: 1px solid rgba(126,182,224,0.35);
-      color: var(--ink-soft);
-      border-radius: 999px;
-      padding: 8px 14px;
-      font-size: 0.86rem;
-      font-weight: 600;
-      box-shadow: 0 4px 14px rgba(90,140,180,0.08);
-    }
-    .stat-chip strong { color: var(--blue-deep); font-weight: 800; }
-    .stat-chip.reserved strong { color: #8a5a72; }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 16px;
-    }
-    .gift-card {
-      position: relative;
-      overflow: hidden;
-      background:
-        linear-gradient(165deg, rgba(255,255,255,0.96) 0%, rgba(245,251,255,0.92) 100%);
-      border: 1px solid rgba(126,182,224,0.32);
-      border-radius: 20px;
-      padding: 20px 16px 16px;
-      box-shadow: var(--shadow);
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      min-height: 230px;
-      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
-    }
-    .gift-card::before {
-      content: "";
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 4px;
-      background: linear-gradient(180deg, #8fc0e8, #5a9fd4);
-      opacity: 0.85;
-    }
-    .gift-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 14px 36px rgba(90, 140, 180, 0.16);
-      border-color: rgba(90,159,212,0.45);
-    }
-    .gift-card.is-reserved {
-      background:
-        linear-gradient(165deg, #f8f4f6 0%, #f1f5f9 100%);
-      border-color: rgba(180, 150, 165, 0.35);
-    }
-    .gift-card.is-reserved::before {
-      background: linear-gradient(180deg, #e8b7c8, #c489a0);
-    }
-    .gift-card.is-reserved:hover { transform: none; }
-    .gift-card.is-reserved .gift-icon,
-    .gift-card.is-reserved h3,
-    .gift-card.is-reserved .desc,
-    .gift-card.is-reserved .price {
-      opacity: 0.55;
-    }
-    .gift-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 14px;
-      display: grid;
-      place-items: center;
-      font-size: 22px;
-      background: var(--blue-wash);
-      border: 1px solid var(--blue-soft);
-    }
-    .gift-card.is-reserved .gift-icon {
-      background: #f7e8ef;
-      border-color: #ecd0db;
-    }
-    .gift-card h3 {
-      font-size: 1.05rem;
-      line-height: 1.3;
-      color: var(--ink);
-      padding-right: 4px;
-    }
-    .desc { color: var(--ink-soft); font-size: 0.9rem; flex: 1; }
-    .price { font-weight: 700; color: var(--blue-deep); font-size: 0.95rem; }
-    .gift-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 6px;
-    }
-    .btn-link, .btn-reserve, .btn-primary, .btn-ghost {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 42px;
-      padding: 8px 14px;
-      border-radius: 999px;
-      font-weight: 700;
-      font-size: 0.88rem;
-      text-decoration: none;
-      border: none;
-      cursor: pointer;
-      touch-action: manipulation;
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-    }
-    .btn-link, .btn-ghost {
-      background: #fff;
-      color: var(--blue-deep);
-      border: 1.5px solid var(--blue-soft);
-    }
-    .btn-reserve, .btn-primary {
-      background: linear-gradient(180deg, #8fc0e8 0%, #5a9fd4 100%);
-      color: #fff;
-      box-shadow: 0 8px 18px rgba(90,159,212,0.28);
-    }
-    .btn-reserve:hover, .btn-primary:hover { transform: translateY(-1px); }
-    .gift-card.is-reserved .btn-reserve { display: none; }
-    .gift-card.is-reserved .btn-link {
-      opacity: 0.7;
-      pointer-events: none;
-    }
-    .reserved-panel {
-      display: none;
-      margin-top: 4px;
-      padding: 12px 12px;
-      border-radius: 14px;
-      background: linear-gradient(135deg, #faf0f4 0%, #f3e8ee 100%);
-      border: 1px solid #e5c9d5;
-    }
-    .gift-card.is-reserved .reserved-panel { display: block; }
-    .reserved-panel .rp-top {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 4px;
-    }
-    .reserved-panel .rp-check {
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      background: #c489a0;
-      color: #fff;
-      display: grid;
-      place-items: center;
-      font-size: 12px;
-      font-weight: 800;
-      flex-shrink: 0;
-    }
-    .reserved-panel .rp-label {
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: #8a5a72;
-    }
-    .reserved-panel .rp-name {
-      font-weight: 700;
-      color: #5c3d4c;
-      font-size: 0.98rem;
-      line-height: 1.25;
-      word-break: break-word;
-    }
-    .badge {
-      display: none;
-    }
-    .no-link { color: var(--ink-soft); font-size: 0.85rem; padding: 10px 0; }
-    footer {
-      text-align: center;
-      margin-top: 36px;
-      color: #9aafc0;
-      font-size: 13px;
-    }
-    /* Modal */
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(40, 60, 80, 0.35);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 18px;
-      z-index: 50;
-    }
-    .modal-backdrop.open { display: flex; }
-    .modal {
-      width: min(100%, 420px);
-      background: #fdfeff;
-      border-radius: 20px;
-      border: 1px solid var(--blue-soft);
-      box-shadow: 0 20px 50px rgba(40,70,100,0.22);
-      padding: 22px 18px 18px;
-    }
-    .modal h2 {
-      font-size: 1.2rem;
-      margin-bottom: 6px;
-      color: var(--blue-deep);
-    }
-    .modal .gift-name {
-      font-weight: 700;
-      margin-bottom: 14px;
-      color: var(--ink);
-    }
-    label {
-      display: block;
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--ink-soft);
-      margin: 10px 0 6px;
-    }
-    input[type="text"], input[type="email"] {
-      width: 100%;
-      border: 1.5px solid var(--blue-soft);
-      border-radius: 12px;
-      padding: 12px 14px;
-      font-size: 1rem;
-      outline: none;
-    }
-    input:focus { border-color: var(--blue-deep); }
-    .modal-actions {
-      display: flex;
-      gap: 8px;
-      margin-top: 16px;
-    }
-    .modal-actions button { flex: 1; }
-    .msg {
-      margin-top: 10px;
-      font-size: 0.9rem;
-      color: var(--blue-deep);
-      min-height: 1.2em;
-    }
-    .msg.error { color: #c45b5b; }
-    .toast {
-      position: fixed;
-      left: 50%;
-      bottom: 22px;
-      transform: translateX(-50%);
-      background: #3a4a5c;
-      color: #fff;
-      padding: 12px 16px;
-      border-radius: 999px;
-      font-size: 0.92rem;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity .25s ease;
-      z-index: 60;
-      max-width: 90vw;
-      text-align: center;
-    }
-    .toast.show { opacity: 1; }
+    :root{--ink:#3a4a5c;--ink-soft:#6b7c8f;--blue:#7eb6e0;--blue-deep:#5a9fd4;--blue-soft:#cfe6f7;--blue-wash:#e8f3fb;--shadow:0 10px 40px rgba(90,140,180,.12);--radius:18px}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:"Avenir Next","Segoe UI","Helvetica Neue",Arial,sans-serif;color:var(--ink);background:radial-gradient(ellipse 80% 50% at 50% 0%,#e3f1fb 0%,transparent 60%),linear-gradient(180deg,#f9fcff 0%,#eef6fc 40%,#f7fbff 100%);min-height:100vh;line-height:1.5}
+    .wrap{max-width:920px;margin:0 auto;padding:28px 18px 80px}
+    header{text-align:center;padding:28px 12px 20px}
+    .pill{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--blue-deep);background:var(--blue-wash);border:1px solid var(--blue-soft);padding:6px 12px;border-radius:999px;margin-bottom:14px}
+    .hero-art{display:flex;align-items:center;justify-content:center;gap:14px;margin:8px 0 10px}
+    .hero-art .cloud,.hero-art .sun{font-size:1.6rem;opacity:.9}
+    .osito-hero{width:108px;height:108px;object-fit:contain;filter:drop-shadow(0 8px 16px rgba(90,140,180,.25));border-radius:24px}
+    h1{font-family:"Snell Roundhand","Segoe Script","Apple Chancery",cursive;font-weight:400;color:var(--blue-deep);font-size:clamp(2rem,7vw,2.8rem);line-height:1.15;margin-bottom:8px}
+    .lead.intro{color:var(--ink-soft);max-width:36em;margin:0 auto 10px;font-size:1rem;line-height:1.55}
+    .lead.intro strong{color:var(--blue-deep)}
+    .meta-pills{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:16px 0 4px}
+    .meta-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.9);border:1px solid var(--blue-soft);color:var(--blue-deep);font-size:.9rem;font-weight:600;padding:8px 14px;border-radius:999px;box-shadow:var(--shadow)}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:22px 0 8px}
+    .toolbar input{min-width:min(100%,280px);border:1.5px solid var(--blue-soft);border-radius:999px;padding:12px 16px;font-size:1rem;outline:none;background:#fff}
+    .toolbar input:focus{border-color:var(--blue-deep)}
+    .stats{text-align:center;color:var(--ink-soft);font-size:.9rem;margin-bottom:18px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+    .gift-card{position:relative;background:rgba(255,255,255,.88);border:1px solid rgba(126,182,224,.35);border-radius:var(--radius);padding:18px 16px 16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px;min-height:210px}
+    .gift-card{transition:transform .2s ease,box-shadow .2s ease}
+    .gift-card:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(90,140,180,.16)}
+    .gift-card.is-reserved{background:linear-gradient(165deg,#f8f4f6 0%,#f1f5f9 100%);border-color:rgba(180,150,165,.35)}
+    .gift-card.is-reserved:hover{transform:none}
+    .gift-card.is-reserved .gift-icon,.gift-card.is-reserved h3,.gift-card.is-reserved .desc,.gift-card.is-reserved .price{opacity:.55}
+    .gift-icon{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;font-size:22px;background:var(--blue-wash);border:1px solid var(--blue-soft)}
+    .gift-card.is-reserved .gift-icon{background:#f7e8ef;border-color:#ecd0db}
+    .gift-card h3{font-size:1.05rem;line-height:1.3}
+    .desc{color:var(--ink-soft);font-size:.9rem;flex:1;font-style:italic;line-height:1.45}
+    .price{font-weight:700;color:var(--blue-deep);font-size:.95rem}
+    .gift-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+    .btn-link,.btn-reserve,.btn-primary,.btn-ghost{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:8px 14px;border-radius:999px;font-weight:700;font-size:.88rem;text-decoration:none;border:none;cursor:pointer;touch-action:manipulation}
+    .btn-link,.btn-ghost{background:#fff;color:var(--blue-deep);border:1.5px solid var(--blue-soft)}
+    .btn-reserve,.btn-primary{background:linear-gradient(180deg,#8fc0e8 0%,#5a9fd4 100%);color:#fff;box-shadow:0 8px 18px rgba(90,159,212,.28)}
+    .btn-reserve:disabled{opacity:.55;cursor:not-allowed}
+    .gift-card.is-reserved .btn-reserve{display:none}
+    .gift-card.is-reserved .btn-link{opacity:.7;pointer-events:none}
+    .badge{display:none}
+    .reserved-panel{display:none;margin-top:4px;padding:12px;border-radius:14px;background:linear-gradient(135deg,#faf0f4 0%,#f3e8ee 100%);border:1px solid #e5c9d5}
+    .gift-card.is-reserved .reserved-panel{display:block}
+    .reserved-panel .rp-top{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+    .reserved-panel .rp-check{width:22px;height:22px;border-radius:50%;background:#c489a0;color:#fff;display:grid;place-items:center;font-size:12px;font-weight:800;flex-shrink:0}
+    .reserved-panel .rp-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#8a5a72}
+    .reserved-panel .rp-name{font-weight:700;color:#5c3d4c;font-size:.98rem;line-height:1.25;word-break:break-word}
+    .stats{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:18px}
+    .stat-chip{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.9);border:1px solid rgba(126,182,224,.35);color:var(--ink-soft);border-radius:999px;padding:8px 14px;font-size:.86rem;font-weight:600;box-shadow:0 4px 14px rgba(90,140,180,.08)}
+    .stat-chip strong{color:var(--blue-deep);font-weight:800}
+    .stat-chip.reserved strong{color:#8a5a72}
+    .no-link{color:var(--ink-soft);font-size:.85rem;padding:10px 0}
+    footer{text-align:center;margin-top:36px;color:#9aafc0;font-size:13px}
+    .modal-backdrop{position:fixed;inset:0;background:rgba(40,60,80,.35);display:none;align-items:center;justify-content:center;padding:18px;z-index:50}
+    .modal-backdrop.open{display:flex}
+    .modal{width:min(100%,420px);background:#fdfeff;border-radius:20px;border:1px solid var(--blue-soft);box-shadow:0 20px 50px rgba(40,70,100,.22);padding:22px 18px 18px}
+    .modal h2{font-size:1.2rem;margin-bottom:6px;color:var(--blue-deep)}
+    .modal .gift-name{font-weight:700;margin-bottom:14px}
+    label{display:block;font-size:.85rem;font-weight:700;color:var(--ink-soft);margin:10px 0 6px}
+    input[type=text],input[type=email]{width:100%;border:1.5px solid var(--blue-soft);border-radius:12px;padding:12px 14px;font-size:1rem;outline:none}
+    input:focus{border-color:var(--blue-deep)}
+    .modal-actions{display:flex;gap:8px;margin-top:16px}
+    .modal-actions button{flex:1}
+    .msg{margin-top:10px;font-size:.9rem;color:var(--blue-deep);min-height:1.2em}
+    .msg.error{color:#c45b5b}
+    .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#3a4a5c;color:#fff;padding:12px 16px;border-radius:999px;font-size:.92rem;opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:60;max-width:90vw;text-align:center}
+    .toast.show{opacity:1}
   </style>
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div class="pill">Baby Shower · Facundo</div>
-      <h1>Lista secreta 🤍</h1>
-      <p class="lead">Elige un regalo, resérvalo con tu nombre y correo, y después cómpralo con el link.</p>
-      <div class="note">🤫 Shhh… no le digas a mis papis que te lo conté yo.<br>Si ya está <strong>Reservado</strong>, elige otro por favor.</div>
-      <div class="toolbar">
-        <input id="search" type="search" placeholder="Buscar regalo…" />
+      <div class="pill">· desde mi nube ·</div>
+      <div class="hero-art" aria-hidden="true">
+        <span class="cloud">☁️</span>
+        <img class="osito-hero" src="data:image/png;base64,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" alt="Osito Facundo">
+        <span class="sun">☀️</span>
       </div>
-      <div class="stats" id="stats"></div>
+      <h1>La Lista Secreta de Facundo</h1>
+      <p class="lead intro">
+        ¡Hola! Soy <strong>Facundo</strong> 💙 Tu presencia y cariño ya son mi mejor regalo.
+        Pero si quieres consentirme, hice esta lista con mucho amor para guiarte con lo que aún me falta.
+        Y recuerda: no tienes que limitarte a esta lista. Si hay algún regalito que quieras elegir por tu cuenta, será recibido con muchísima alegría y cariño. 🤍
+      </p>
+      <div class="meta-pills">
+        <span class="meta-pill">📅 Sábado 22 de agosto · 14:00 a 22:00 hrs</span>
+        <span class="meta-pill">📍 Terrazas San Miguel (Talca)</span>
+      </div>
+      <div class="toolbar"><input id="search" type="search" placeholder="Buscar regalo…"></div>
+      <div class="stats" id="stats">35 disponibles · 0 reservados · 35 en total</div>
     </header>
-
     <section class="grid" id="grid">
-      
-    <article class="gift-card" data-id="g1-0" data-name="Silla Mecedora Tavia Beige">
-      <div class="gift-icon">🎁</div>
-      <h3>Silla Mecedora Tavia Beige</h3>
-      <p class="desc">Silla mecedora para lactancia y descanso, color beige</p>
-      
-      <div class="gift-actions">
-        <a class="btn-link" href="https://www.relan.cl/products/silla-mecedora-tavia-beige" target="_blank" rel="noopener noreferrer">Ver producto</a>
-        <button type="button" class="btn-reserve" data-id="g1-0" data-name="Silla Mecedora Tavia Beige">Reservar</button>
-      </div>
-      <div class="reserved-panel reserved-badge" hidden>
-        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
-        <div class="rp-name"></div>
-      </div>
-    </article>
-    <article class="gift-card" data-id="g2-1" data-name="Carrito Organizador Metálico 3 Niveles Blanco">
-      <div class="gift-icon">🎁</div>
-      <h3>Carrito Organizador Metálico 3 Niveles Blanco</h3>
-      <p class="desc">Carrito organizador con asa y ruedas, 3 niveles, blanco</p>
-      
-      <div class="gift-actions">
-        <a class="btn-link" href="https://www.falabella.com/falabella-cl/product/139542986/Carrito-Organizador-Metalico-Con-Asa-Ruedas-3-Niveles-Blanco/139542987" target="_blank" rel="noopener noreferrer">Ver producto</a>
-        <button type="button" class="btn-reserve" data-id="g2-1" data-name="Carrito Organizador Metálico 3 Niveles Blanco">Reservar</button>
-      </div>
-      <div class="reserved-panel reserved-badge" hidden>
-        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
-        <div class="rp-name"></div>
-      </div>
-    </article>
-    <article class="gift-card" data-id="g3-2" data-name="Colchón de Cuna 70 x 130 x 12 cm">
-      <div class="gift-icon">🎁</div>
-      <h3>Colchón de Cuna 70 x 130 x 12 cm</h3>
-      <p class="desc">Colchón para cuna, medidas 70 x 130 x 12 cm</p>
-      
-      <div class="gift-actions">
-        <a class="btn-link" href="https://drimkip.cl/colchon-de-cuna-70-x-130-x-12cm.html" target="_blank" rel="noopener noreferrer">Ver producto</a>
-        <button type="button" class="btn-reserve" data-id="g3-2" data-name="Colchón de Cuna 70 x 130 x 12 cm">Reservar</button>
-      </div>
-      <div class="reserved-panel reserved-badge" hidden>
-        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
-        <div class="rp-name"></div>
-      </div>
-    </article>
-    <article class="gift-card" data-id="g4-3" data-name="Sábanas 300 Hilos Cuna Evolutiva 70x140 cm - Blanco">
-      <div class="gift-icon">🎁</div>
-      <h3>Sábanas 300 Hilos Cuna Evolutiva 70x140 cm - Blanco</h3>
-      <p class="desc">Juego de sábanas 300 hilos para cuna evolutiva, blanco</p>
-      
-      <div class="gift-actions">
-        <a class="btn-link" href="https://www.carestino.cl/producto/sabanas-300-hilos-para-cuna-evolutiva-de-70x140cm-blanco/" target="_blank" rel="noopener noreferrer">Ver producto</a>
-        <button type="button" class="btn-reserve" data-id="g4-3" data-name="Sábanas 300 Hilos Cuna Evolutiva 70x140 cm - Blanco">Reservar</button>
-      </div>
-      <div class="reserved-panel reserved-badge" hidden>
-        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
-        <div class="rp-name"></div>
-      </div>
-    </article>
-    <article class="gift-card" data-id="g5-4" data-name="Set cuna colecho">
-      <div class="gift-icon">🎁</div>
-      <h3>Set cuna colecho</h3>
-      <p class="desc">Juego de sabanas para cuna colecho</p>
-      <div class="price">$35.000</div>
-      <div class="gift-actions">
-        <a class="btn-link" href="https://www.mercadolibre.cl/p/MLC66949598?matt_tool=94515950&amp;pdp_filters=item_id:MLC3951906738&amp;ua=B9zOXpOk2dRNNHufD0fdlZmi0FWVMcxB3pMU7La9ZvOCgPC8#origin=share&amp;sid=share&amp;wid=MLC3951906738&amp;action=whatsapp" target="_blank" rel="noopener noreferrer">Ver producto</a>
-        <button type="button" class="btn-reserve" data-id="g5-4" data-name="Set cuna colecho">Reservar</button>
-      </div>
-      <div class="reserved-panel reserved-badge" hidden>
-        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
-        <div class="rp-name"></div>
-      </div>
-    </article>
-    <article class="gift-card" data-id="g6-5" data-name="Set 2 Sacaleche / Extractor de Leche Materna con Control Remoto + 10 Bolsas">
-      <div class="gift-icon">🎁</div>
-      <h3>Set 2 Sacaleche / Extractor de Leche Materna con Control Remoto + 10 Bolsas</h3>
-      <p class="desc">Extractor de leche materna eléctrico con control remoto, incluye 10 bolsas</p>
-      
-      <div class="gift-actions">
-        <a class="btn-link" href="https://bebesit.cl/products/set-2-sacaleche-extractor-leche-materna-control-remoto-10-bolsas" target="_blank" rel="noopener noreferrer">Ver producto</a>
-        <button type="button" class="btn-reserve" data-id="g6-5" data-name="Set 2 Sacaleche / Extractor de Leche Materna con Control Remoto + 10 Bolsas">Reservar</button>
-      </div>
-      <div class="reserved-panel reserved-badge" hidden>
-        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
-        <div class="rp-name"></div>
-      </div>
-    </article>
-    <article class="gift-card" data-id="g7-6" data-name="Monitor Digital Portátil">
-      <div class="gift-icon">🎁</div>
-      <h3>Monitor Digital Portátil</h3>
-      <p class="desc">Monitor de bebé digital portátil</p>
-      
-      <div class="gift-actions">
-        <a class="btn-link" href="https://bebesit.cl/products/monitor-digital-portatil" target="_blank" rel="noopener noreferrer">Ver producto</a>
-        <button type="button" class="btn-reserve" data-id="g7-6" data-name="Monitor Digital Portátil">Reservar</button>
-      </div>
-      <div class="reserved-panel reserved-badge" hidden>
-        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
-        <div class="rp-name"></div>
-      </div>
-    </article>
-    <article class="gift-card" data-id="g8-7" data-name="Porta Bebé B009R Gris">
-      <div class="gift-icon">🎁</div>
-      <h3>Porta Bebé B009R Gris</h3>
-      <p class="desc">Porta bebé / canguro ergonómico, color gris</p>
-      
-      <div class="gift-actions">
-        <a class="btn-link" href="https://www.baby-planet.cl/products/porta-bebe-b009r-grey" target="_blank" rel="noopener noreferrer">Ver producto</a>
-        <button type="button" class="btn-reserve" data-id="g8-7" data-name="Porta Bebé B009R Gris">Reservar</button>
-      </div>
-      <div class="reserved-panel reserved-badge" hidden>
-        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
-        <div class="rp-name"></div>
-      </div>
-    </article>
-    <article class="gift-card" data-id="g9-8" data-name="Mudador Portátil">
-      <div class="gift-icon">🎁</div>
-      <h3>Mudador Portátil</h3>
-      <p class="desc">Mudador portátil para cambio de pañales</p>
-      
-      <div class="gift-actions">
-        <a class="btn-link" href="https://www.simplegracia.cl/products/mudador-portatil" target="_blank" rel="noopener noreferrer">Ver producto</a>
-        <button type="button" class="btn-reserve" data-id="g9-8" data-name="Mudador Portátil">Reservar</button>
-      </div>
-      <div class="reserved-panel reserved-badge" hidden>
-        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
-        <div class="rp-name"></div>
-      </div>
-    </article>
-    <article class="gift-card" data-id="g10-9" data-name="Bolso Maternal Premium Black Gold">
-      <div class="gift-icon">🎁</div>
-      <h3>Bolso Maternal Premium Black Gold</h3>
-      <p class="desc">Bolso maternal / pañalera premium, negro y dorado</p>
-      
-      <div class="gift-actions">
-        <a class="btn-link" href="https://www.falabella.com/falabella-cl/product/149733952/bolso-maternal-premium-black-gold/149733953" target="_blank" rel="noopener noreferrer">Ver producto</a>
-        <button type="button" class="btn-reserve" data-id="g10-9" data-name="Bolso Maternal Premium Black Gold">Reservar</button>
-      </div>
-      <div class="reserved-panel reserved-badge" hidden>
-        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
-        <div class="rp-name"></div>
-      </div>
-    </article>
-    <article class="gift-card" data-id="g11-10" data-name="Set de tutos">
-      <div class="gift-icon">🎁</div>
-      <h3>Set de tutos</h3>
-      <p class="desc">Set de mantas tutos para bebé</p>
-      <div class="price">$8.450</div>
-      <div class="gift-actions">
-        <a class="btn-link" href="https://www.mercadolibre.cl/up/MLCU2465876591?matt_tool=94515950&amp;pdp_filters=item_id:MLC2747915966&amp;ua=j8pRcmUQSLOSCghFQDD2AVh7iYa7jC8dYCUQDNPZFeCubKHm#origin=share&amp;sid=share&amp;wid=MLC2747915966&amp;action=whatsapp" target="_blank" rel="noopener noreferrer">Ver producto</a>
-        <button type="button" class="btn-reserve" data-id="g11-10" data-name="Set de tutos">Reservar</button>
-      </div>
-      <div class="reserved-panel reserved-badge" hidden>
-        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
-        <div class="rp-name"></div>
-      </div>
-    </article>
-    <article class="gift-card" data-id="g12-11" data-name="Manta de Algodón Café">
-      <div class="gift-icon">🎁</div>
-      <h3>Manta de Algodón Café</h3>
-      <p class="desc">Manta de algodón para bebé, color café</p>
-      
-      <div class="gift-actions">
-        <a class="btn-link" href="https://www.falabella.com/falabella-cl/product/148487017/manta-algodon-cafe/149835148" target="_blank" rel="noopener noreferrer">Ver producto</a>
-        <button type="button" class="btn-reserve" data-id="g12-11" data-name="Manta de Algodón Café">Reservar</button>
-      </div>
-      <div class="reserved-panel reserved-badge" hidden>
-        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
-        <div class="rp-name"></div>
-      </div>
-    </article>
-    <article class="gift-card" data-id="g13-12" data-name="Set de tutos">
-      <div class="gift-icon">🎁</div>
-      <h3>Set de tutos</h3>
-      <p class="desc">Set de tutos (manta)</p>
-      <div class="price">$8.990</div>
-      <div class="gift-actions">
-        <a class="btn-link" href="https://www.mercadolibre.cl/p/MLC62526330?attributes=PATTERN_NAME:MLC65971669,COLOR:MLC62526330&amp;matt_tool=94515950&amp;pdp_filters=item_id:MLC1766382955&amp;ua=eamZgWlr3bKhL-M95dN4sUZki0E9sB16ATTw9MZF_iWelGnE#origin=share&amp;sid=share&amp;wid=MLC1766382955&amp;action=whatsapp" target="_blank" rel="noopener noreferrer">Ver producto</a>
-        <button type="button" class="btn-reserve" data-id="g13-12" data-name="Set de tutos">Reservar</button>
-      </div>
-      <div class="reserved-panel reserved-badge" hidden>
-        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
-        <div class="rp-name"></div>
-      </div>
-    </article>
-    <article class="gift-card" data-id="g14-13" data-name="Pack de Baberos">
-      <div class="gift-icon">🎁</div>
-      <h3>Pack de Baberos</h3>
-      <p class="desc">Baberos</p>
-      <div class="price">$9.990</div>
-      <div class="gift-actions">
-        <a class="btn-link" href="https://www.mercadolibre.cl/p/MLC65124676?matt_tool=94515950&amp;pdp_filters=item_id:MLC3553346636&amp;ua=U_tmyNxeuCcCok2-SmmGtaF6p3qSsTyI47Vfw3L8IQVpCndh#origin=share&amp;sid=share&amp;wid=MLC3553346636&amp;action=whatsapp" target="_blank" rel="noopener noreferrer">Ver producto</a>
-        <button type="button" class="btn-reserve" data-id="g14-13" data-name="Pack de Baberos">Reservar</button>
-      </div>
-      <div class="reserved-panel reserved-badge" hidden>
-        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
-        <div class="rp-name"></div>
-      </div>
-    </article>
-    <article class="gift-card" data-id="g15-14" data-name="Cobertor de cuna">
-      <div class="gift-icon">🎁</div>
-      <h3>Cobertor de cuna</h3>
-      <p class="desc">Cobertor de cuna</p>
-      <div class="price">$14.990</div>
-      <div class="gift-actions">
-        <a class="btn-link" href="https://www.mercadolibre.cl/up/MLCU3556047941?matt_tool=94515950&amp;pdp_filters=item_id:MLC3332335336&amp;ua=FKE0BzVQ7T5GNRHPGqIE6k-osu9n0-GmcxMzPq08za_XwuRD#origin=share&amp;sid=share&amp;wid=MLC3332335336&amp;action=whatsapp" target="_blank" rel="noopener noreferrer">Ver producto</a>
-        <button type="button" class="btn-reserve" data-id="g15-14" data-name="Cobertor de cuna">Reservar</button>
-      </div>
-      <div class="reserved-panel reserved-badge" hidden>
-        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
-        <div class="rp-name"></div>
-      </div>
-    </article>
-    <article class="gift-card" data-id="g16-15" data-name="Manta / Frazada Polar para Bebés">
-      <div class="gift-icon">🎁</div>
-      <h3>Manta / Frazada Polar para Bebés</h3>
-      <p class="desc">Manta polar suave para bebé</p>
-      
-      <div class="gift-actions">
-        <a class="btn-link" href="https://www.falabella.com/falabella-cl/product/147969186/Manta-Frazada-Cobija-Polar-Para-Bebes/147969189" target="_blank" rel="noopener noreferrer">Ver producto</a>
-        <button type="button" class="btn-reserve" data-id="g16-15" data-name="Manta / Frazada Polar para Bebés">Reservar</button>
-      </div>
-      <div class="reserved-panel reserved-badge" hidden>
-        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
-        <div class="rp-name"></div>
-      </div>
-    </article>
-    <article class="gift-card" data-id="g17-16" data-name="Manta Regalería Niño Celeste">
-      <div class="gift-icon">🎁</div>
-      <h3>Manta Regalería Niño Celeste</h3>
-      <p class="desc">Manta de regalo para niño, color celeste</p>
-      
-      <div class="gift-actions">
-        <a class="btn-link" href="https://www.opaline.cl/manta-regaleria-nino-celeste-mnpl0340i25/p" target="_blank" rel="noopener noreferrer">Ver producto</a>
-        <button type="button" class="btn-reserve" data-id="g17-16" data-name="Manta Regalería Niño Celeste">Reservar</button>
-      </div>
-      <div class="reserved-panel reserved-badge" hidden>
-        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
-        <div class="rp-name"></div>
-      </div>
-    </article>
-    <article class="gift-card" data-id="g18-17" data-name="Saco de Dormir Unisex">
-      <div class="gift-icon">🎁</div>
-      <h3>Saco de Dormir Unisex</h3>
-      <p class="desc">Saco de dormir para bebé, unisex</p>
-      
-      <div class="gift-actions">
-        <a class="btn-link" href="https://www.opaline.cl/saco-de-dormir-unisex/p" target="_blank" rel="noopener noreferrer">Ver producto</a>
-        <button type="button" class="btn-reserve" data-id="g18-17" data-name="Saco de Dormir Unisex">Reservar</button>
-      </div>
-      <div class="reserved-panel reserved-badge" hidden>
-        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
-        <div class="rp-name"></div>
-      </div>
-    </article>
-    <article class="gift-card" data-id="g19-18" data-name="Pack de toallas de baño">
-      <div class="gift-icon">🎁</div>
-      <h3>Pack de toallas de baño</h3>
-      <p class="desc">Toallas de baño</p>
-      <div class="price">$18.250</div>
-      <div class="gift-actions">
-        <a class="btn-link" href="https://www.mercadolibre.cl/up/MLCU4141102446?matt_tool=94515950&amp;pdp_filters=item_id:MLC2013912027&amp;ua=fPaCkSJSsw3M7-iXxUoMlxc1gp96YiBRWIM2eLXrqBj706fr#origin=share&amp;sid=share&amp;wid=MLC2013912027&amp;action=whatsapp" target="_blank" rel="noopener noreferrer">Ver producto</a>
-        <button type="button" class="btn-reserve" data-id="g19-18" data-name="Pack de toallas de baño">Reservar</button>
-      </div>
-      <div class="reserved-panel reserved-badge" hidden>
-        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
-        <div class="rp-name"></div>
-      </div>
-    </article>
-    <article class="gift-card" data-id="g20-19" data-name="Protecto Cama">
-      <div class="gift-icon">🎁</div>
-      <h3>Protecto Cama</h3>
-      <p class="desc">Protecto de cama</p>
-      <div class="price">$14.715</div>
-      <div class="gift-actions">
-        <a class="btn-link" href="https://www.mercadolibre.cl/up/MLCU4026952279?matt_tool=94515950&amp;pdp_filters=item_id:MLC4034285808&amp;ua=fg7_dyR7qS0ehi-yORCQ5zal5KDvTz0bYkuGNrh1Bdrcy53S#origin=share&amp;sid=share&amp;wid=MLC4034285808&amp;action=whatsapp" target="_blank" rel="noopener noreferrer">Ver producto</a>
-        <button type="button" class="btn-reserve" data-id="g20-19" data-name="Protecto Cama">Reservar</button>
-      </div>
-      <div class="reserved-panel reserved-badge" hidden>
-        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
-        <div class="rp-name"></div>
-      </div>
-    </article>
-    <article class="gift-card" data-id="g21-20" data-name="Cojín de lactancia">
-      <div class="gift-icon">🎁</div>
-      <h3>Cojín de lactancia</h3>
-      <p class="desc">Cojín de lactancia</p>
-      <div class="price">$29.990</div>
-      <div class="gift-actions">
-        <a class="btn-link" href="https://www.mercadolibre.cl/up/MLCU4010784599?matt_tool=94515950&amp;pdp_filters=item_id:MLC1976973383&amp;ua=Xa6JbuUG224R5DoBiQWojNK25RNNRCX3_VLbfYm7vAx1OWi6#origin=share&amp;sid=share&amp;wid=MLC1976973383&amp;action=whatsapp" target="_blank" rel="noopener noreferrer">Ver producto</a>
-        <button type="button" class="btn-reserve" data-id="g21-20" data-name="Cojín de lactancia">Reservar</button>
-      </div>
-      <div class="reserved-panel reserved-badge" hidden>
-        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
-        <div class="rp-name"></div>
-      </div>
-    </article>
-    <article class="gift-card" data-id="g22-21" data-name="Mamadera">
-      <div class="gift-icon">🎁</div>
-      <h3>Mamadera</h3>
-      <p class="desc">Mamadera Phillips</p>
-      <div class="price">$15.990</div>
-      <div class="gift-actions">
-        <a class="btn-link" href="https://www.mercadolibre.cl/p/MLC29164190?matt_tool=94515950&amp;pdp_filters=item_id:MLC4085080602&amp;ua=nhLqsAXbIzTGZ71W7A6NGPLZiKvgjUhGbyDkgti5nmKeO4V5#origin=share&amp;sid=share&amp;wid=MLC4085080602&amp;action=whatsapp" target="_blank" rel="noopener noreferrer">Ver producto</a>
-        <button type="button" class="btn-reserve" data-id="g22-21" data-name="Mamadera">Reservar</button>
-      </div>
-      <div class="reserved-panel reserved-badge" hidden>
-        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
-        <div class="rp-name"></div>
-      </div>
-    </article>
-    <article class="gift-card" data-id="g23-22" data-name="Aspirador Nasal Eléctrico para Bebé (Saca Mocos)">
-      <div class="gift-icon">🎁</div>
-      <h3>Aspirador Nasal Eléctrico para Bebé (Saca Mocos)</h3>
-      <p class="desc">Limpiador / aspirador nasal eléctrico para bebé</p>
-      
-      <div class="gift-actions">
-        <a class="btn-link" href="https://www.falabella.com/falabella-cl/product/140928208/Aspirador-Nasal-Para-Bebe-Saca-Mocos-Electrico-Limpiador/140928209" target="_blank" rel="noopener noreferrer">Ver producto</a>
-        <button type="button" class="btn-reserve" data-id="g23-22" data-name="Aspirador Nasal Eléctrico para Bebé (Saca Mocos)">Reservar</button>
-      </div>
-      <div class="reserved-panel reserved-badge" hidden>
-        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
-        <div class="rp-name"></div>
-      </div>
-    </article>
-    <article class="gift-card" data-id="g24-23" data-name="Lima de uñas de bebé">
-      <div class="gift-icon">🎁</div>
-      <h3>Lima de uñas de bebé</h3>
-      
-      <div class="price">$11.695</div>
-      <div class="gift-actions">
-        <a class="btn-link" href="https://www.mercadolibre.cl/p/MLC41552105?matt_tool=94515950&amp;pdp_filters=item_id:MLC3037581468&amp;ua=KEjGmAJz56i5H-LqZGYwoUBC-B15F7jeZ8QNbFZV8_rzi3F2#origin=share&amp;sid=share&amp;wid=MLC3037581468&amp;action=whatsapp" target="_blank" rel="noopener noreferrer">Ver producto</a>
-        <button type="button" class="btn-reserve" data-id="g24-23" data-name="Lima de uñas de bebé">Reservar</button>
-      </div>
-      <div class="reserved-panel reserved-badge" hidden>
-        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
-        <div class="rp-name"></div>
-      </div>
-    </article>
-    <article class="gift-card" data-id="g25-24" data-name="Juego de Sábanas Cuna Colecho Bebé">
-      <div class="gift-icon">🎁</div>
-      <h3>Juego de Sábanas Cuna Colecho Bebé</h3>
-      <p class="desc">Juego de sábanas para cuna de colecho</p>
-      
-      <div class="gift-actions">
-        <a class="btn-link" href="https://www.falabella.com/falabella-cl/product/137955281/Juego-de-sabana-cuna-colecho-bebe/137955282" target="_blank" rel="noopener noreferrer">Ver producto</a>
-        <button type="button" class="btn-reserve" data-id="g25-24" data-name="Juego de Sábanas Cuna Colecho Bebé">Reservar</button>
-      </div>
-      <div class="reserved-panel reserved-badge" hidden>
-        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
-        <div class="rp-name"></div>
-      </div>
-    </article>
-    <article class="gift-card" data-id="g26-25" data-name="Bee Bee Juego de Sábanas Colecho Punto Beige">
-      <div class="gift-icon">🎁</div>
-      <h3>Bee Bee Juego de Sábanas Colecho Punto Beige</h3>
-      <p class="desc">Juego de sábanas colecho, tejido punto, beige</p>
-      
-      <div class="gift-actions">
-        <a class="btn-link" href="https://www.falabella.com/falabella-cl/product/16379704/Bee-Bee-Juego-Sabanas-Colecho-Punto-Beige/16379704" target="_blank" rel="noopener noreferrer">Ver producto</a>
-        <button type="button" class="btn-reserve" data-id="g26-25" data-name="Bee Bee Juego de Sábanas Colecho Punto Beige">Reservar</button>
-      </div>
-      <div class="reserved-panel reserved-badge" hidden>
-        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
-        <div class="rp-name"></div>
-      </div>
-    </article>
-    <article class="gift-card" data-id="g27-26" data-name="Juego de Sábanas Colecho Estrellas Grises">
-      <div class="gift-icon">🎁</div>
-      <h3>Juego de Sábanas Colecho Estrellas Grises</h3>
-      <p class="desc">Juego de sábanas colecho, diseño estrellas grises</p>
-      
-      <div class="gift-actions">
-        <a class="btn-link" href="https://www.falabella.com/falabella-cl/product/128374413/JUEGO-DE-SABANAS-COLECHO-ESTRELLAS-GRISES/128374414" target="_blank" rel="noopener noreferrer">Ver producto</a>
-        <button type="button" class="btn-reserve" data-id="g27-26" data-name="Juego de Sábanas Colecho Estrellas Grises">Reservar</button>
-      </div>
-      <div class="reserved-panel reserved-badge" hidden>
-        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
-        <div class="rp-name"></div>
-      </div>
-    </article>
-    <article class="gift-card" data-id="g28-27" data-name="Sábanas 300 Hilos Cuna Evolutiva 70x140 cm - Beige">
-      <div class="gift-icon">🎁</div>
-      <h3>Sábanas 300 Hilos Cuna Evolutiva 70x140 cm - Beige</h3>
-      <p class="desc">Juego de sábanas 300 hilos para cuna evolutiva, beige</p>
-      
-      <div class="gift-actions">
-        <a class="btn-link" href="https://www.carestino.cl/producto/sabanas-300-hilos-para-cuna-evolutiva-de-70x140cm-beige/" target="_blank" rel="noopener noreferrer">Ver producto</a>
-        <button type="button" class="btn-reserve" data-id="g28-27" data-name="Sábanas 300 Hilos Cuna Evolutiva 70x140 cm - Beige">Reservar</button>
-      </div>
-      <div class="reserved-panel reserved-badge" hidden>
-        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
-        <div class="rp-name"></div>
-      </div>
-    </article>
-    <article class="gift-card" data-id="g29-28" data-name="Chupete Ultra Soft 0-6 Niño Philips Avent">
-      <div class="gift-icon">🎁</div>
-      <h3>Chupete Ultra Soft 0-6 Niño Philips Avent</h3>
-      <p class="desc">Chupete Philips Avent Ultra Soft, 0-6 meses, niño</p>
-      
-      <div class="gift-actions">
-        <a class="btn-link" href="https://www.falabella.com/falabella-cl/product/146246576/Chupete-Ultra-Soft-0-6-Nino-Philips-Avent/146246577" target="_blank" rel="noopener noreferrer">Ver producto</a>
-        <button type="button" class="btn-reserve" data-id="g29-28" data-name="Chupete Ultra Soft 0-6 Niño Philips Avent">Reservar</button>
-      </div>
-      <div class="reserved-panel reserved-badge" hidden>
-        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
-        <div class="rp-name"></div>
-      </div>
-    </article>
-    <article class="gift-card" data-id="g30-29" data-name="Pack x3 Tutos de Algodón Bebesit">
-      <div class="gift-icon">🎁</div>
-      <h3>Pack x3 Tutos de Algodón Bebesit</h3>
-      <p class="desc">Pack de 3 tutos (mantitas de apego) de algodón, Bebesit</p>
-      
-      <div class="gift-actions">
-        <a class="btn-link" href="https://www.falabella.com/falabella-cl/product/80759469/pack-x3-tutos-algodon-bebesit/80759469" target="_blank" rel="noopener noreferrer">Ver producto</a>
-        <button type="button" class="btn-reserve" data-id="g30-29" data-name="Pack x3 Tutos de Algodón Bebesit">Reservar</button>
-      </div>
-      <div class="reserved-panel reserved-badge" hidden>
-        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
-        <div class="rp-name"></div>
-      </div>
-    </article>
     <article class="gift-card" data-id="g31-30" data-name="Pañales Talla RN">
       <div class="gift-icon">🎁</div>
       <h3>Pañales Talla RN</h3>
-      
+      <p class="desc">“Parto chiquitito: estos pañales RN son mi primera camiseta de la selección.”</p>
       
       <div class="gift-actions">
         <span class="no-link">Sin link aún</span>
@@ -799,7 +112,7 @@
     <article class="gift-card" data-id="g32-31" data-name="Pañales Talla P1">
       <div class="gift-icon">🎁</div>
       <h3>Pañales Talla P1</h3>
-      
+      <p class="desc">“Cuando suba de categoría, la P1 me saca del apuro (y a mis papis también).”</p>
       
       <div class="gift-actions">
         <span class="no-link">Sin link aún</span>
@@ -813,7 +126,7 @@
     <article class="gift-card" data-id="g33-32" data-name="Pañales Talla P2">
       <div class="gift-icon">🎁</div>
       <h3>Pañales Talla P2</h3>
-      
+      <p class="desc">“Con la P2 gateo con onda… y sin dejar el living en modo emergencia.”</p>
       
       <div class="gift-actions">
         <span class="no-link">Sin link aún</span>
@@ -827,7 +140,7 @@
     <article class="gift-card" data-id="g34-33" data-name="Pañales Talla P3">
       <div class="gift-icon">🎁</div>
       <h3>Pañales Talla P3</h3>
-      
+      <p class="desc">“La P3 es pa’ cuando ya ande suelto y nadie me alcance.”</p>
       
       <div class="gift-actions">
         <span class="no-link">Sin link aún</span>
@@ -841,7 +154,7 @@
     <article class="gift-card" data-id="g35-34" data-name="Pañales Talla P3">
       <div class="gift-icon">🎁</div>
       <h3>Pañales Talla P3</h3>
-      
+      <p class="desc">“Otra P3 nunca está de más: yo cambio más que el clima en Talca.”</p>
       
       <div class="gift-actions">
         <span class="no-link">Sin link aún</span>
@@ -852,20 +165,438 @@
         <div class="rp-name"></div>
       </div>
     </article>
-    </section>
-
+    <article class="gift-card" data-id="g11-10" data-name="Set de tutos">
+      <div class="gift-icon">🎁</div>
+      <h3>Set de tutos</h3>
+      <p class="desc">“Mantitas de apego: mi versión bebé de la frazada de la suerte.”</p>
+      <div class="price">$8.450</div>
+      <div class="gift-actions">
+        <a class="btn-link" href="https://www.mercadolibre.cl/up/MLCU2465876591?matt_tool=94515950&amp;pdp_filters=item_id:MLC2747915966&amp;ua=j8pRcmUQSLOSCghFQDD2AVh7iYa7jC8dYCUQDNPZFeCubKHm#origin=share&amp;sid=share&amp;wid=MLC2747915966&amp;action=whatsapp" target="_blank" rel="noopener noreferrer">Ver producto</a>
+        <button type="button" class="btn-reserve" data-id="g11-10" data-name="Set de tutos">Reservar</button>
+      </div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
+    </article>
+    <article class="gift-card" data-id="g13-12" data-name="Set de tutos">
+      <div class="gift-icon">🎁</div>
+      <h3>Set de tutos</h3>
+      <p class="desc">“Más tutos = más mimos. Matemática de osito, simple y efectiva.”</p>
+      <div class="price">$8.990</div>
+      <div class="gift-actions">
+        <a class="btn-link" href="https://www.mercadolibre.cl/p/MLC62526330?attributes=PATTERN_NAME:MLC65971669,COLOR:MLC62526330&amp;matt_tool=94515950&amp;pdp_filters=item_id:MLC1766382955&amp;ua=eamZgWlr3bKhL-M95dN4sUZki0E9sB16ATTw9MZF_iWelGnE#origin=share&amp;sid=share&amp;wid=MLC1766382955&amp;action=whatsapp" target="_blank" rel="noopener noreferrer">Ver producto</a>
+        <button type="button" class="btn-reserve" data-id="g13-12" data-name="Set de tutos">Reservar</button>
+      </div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
+    </article>
+    <article class="gift-card" data-id="g14-13" data-name="Pack de Baberos">
+      <div class="gift-icon">🎁</div>
+      <h3>Pack de Baberos</h3>
+      <p class="desc">“Baberos, porque mi cara de santo no calza con mi puntería al comer.”</p>
+      <div class="price">$9.990</div>
+      <div class="gift-actions">
+        <a class="btn-link" href="https://www.mercadolibre.cl/p/MLC65124676?matt_tool=94515950&amp;pdp_filters=item_id:MLC3553346636&amp;ua=U_tmyNxeuCcCok2-SmmGtaF6p3qSsTyI47Vfw3L8IQVpCndh#origin=share&amp;sid=share&amp;wid=MLC3553346636&amp;action=whatsapp" target="_blank" rel="noopener noreferrer">Ver producto</a>
+        <button type="button" class="btn-reserve" data-id="g14-13" data-name="Pack de Baberos">Reservar</button>
+      </div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
+    </article>
+    <article class="gift-card" data-id="g24-23" data-name="Lima de uñas de bebé">
+      <div class="gift-icon">🎁</div>
+      <h3>Lima de uñas de bebé</h3>
+      <p class="desc">“Mis uñitas crecen a mil; una lima fina y salvamos los sillones de la casa.”</p>
+      <div class="price">$11.695</div>
+      <div class="gift-actions">
+        <a class="btn-link" href="https://www.mercadolibre.cl/p/MLC41552105?matt_tool=94515950&amp;pdp_filters=item_id:MLC3037581468&amp;ua=KEjGmAJz56i5H-LqZGYwoUBC-B15F7jeZ8QNbFZV8_rzi3F2#origin=share&amp;sid=share&amp;wid=MLC3037581468&amp;action=whatsapp" target="_blank" rel="noopener noreferrer">Ver producto</a>
+        <button type="button" class="btn-reserve" data-id="g24-23" data-name="Lima de uñas de bebé">Reservar</button>
+      </div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
+    </article>
+    <article class="gift-card" data-id="g20-19" data-name="Protecto Cama">
+      <div class="gift-icon">🎁</div>
+      <h3>Protecto Cama</h3>
+      <p class="desc">“Protecto de cama: porque a veces mis noches se ponen… creativas.”</p>
+      <div class="price">$14.715</div>
+      <div class="gift-actions">
+        <a class="btn-link" href="https://www.mercadolibre.cl/up/MLCU4026952279?matt_tool=94515950&amp;pdp_filters=item_id:MLC4034285808&amp;ua=fg7_dyR7qS0ehi-yORCQ5zal5KDvTz0bYkuGNrh1Bdrcy53S#origin=share&amp;sid=share&amp;wid=MLC4034285808&amp;action=whatsapp" target="_blank" rel="noopener noreferrer">Ver producto</a>
+        <button type="button" class="btn-reserve" data-id="g20-19" data-name="Protecto Cama">Reservar</button>
+      </div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
+    </article>
+    <article class="gift-card" data-id="g15-14" data-name="Cobertor de cuna">
+      <div class="gift-icon">🎁</div>
+      <h3>Cobertor de cuna</h3>
+      <p class="desc">“Cobertor calentito pa’ siestas de crack (y la siesta de la siesta).”</p>
+      <div class="price">$14.990</div>
+      <div class="gift-actions">
+        <a class="btn-link" href="https://www.mercadolibre.cl/up/MLCU3556047941?matt_tool=94515950&amp;pdp_filters=item_id:MLC3332335336&amp;ua=FKE0BzVQ7T5GNRHPGqIE6k-osu9n0-GmcxMzPq08za_XwuRD#origin=share&amp;sid=share&amp;wid=MLC3332335336&amp;action=whatsapp" target="_blank" rel="noopener noreferrer">Ver producto</a>
+        <button type="button" class="btn-reserve" data-id="g15-14" data-name="Cobertor de cuna">Reservar</button>
+      </div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
+    </article>
+    <article class="gift-card" data-id="g22-21" data-name="Mamadera">
+      <div class="gift-icon">🎁</div>
+      <h3>Mamadera</h3>
+      <p class="desc">“Mamadera lista pa’ mis breaks de leche con cara de ‘ya era hora, po’.”</p>
+      <div class="price">$15.990</div>
+      <div class="gift-actions">
+        <a class="btn-link" href="https://www.mercadolibre.cl/p/MLC29164190?matt_tool=94515950&amp;pdp_filters=item_id:MLC4085080602&amp;ua=nhLqsAXbIzTGZ71W7A6NGPLZiKvgjUhGbyDkgti5nmKeO4V5#origin=share&amp;sid=share&amp;wid=MLC4085080602&amp;action=whatsapp" target="_blank" rel="noopener noreferrer">Ver producto</a>
+        <button type="button" class="btn-reserve" data-id="g22-21" data-name="Mamadera">Reservar</button>
+      </div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
+    </article>
+    <article class="gift-card" data-id="g19-18" data-name="Pack de toallas de baño">
+      <div class="gift-icon">🎁</div>
+      <h3>Pack de toallas de baño</h3>
+      <p class="desc">“Toallas suaves post-baño: quiero salir esponjoso, no como pollito mojado.”</p>
+      <div class="price">$18.250</div>
+      <div class="gift-actions">
+        <a class="btn-link" href="https://www.mercadolibre.cl/up/MLCU4141102446?matt_tool=94515950&amp;pdp_filters=item_id:MLC2013912027&amp;ua=fPaCkSJSsw3M7-iXxUoMlxc1gp96YiBRWIM2eLXrqBj706fr#origin=share&amp;sid=share&amp;wid=MLC2013912027&amp;action=whatsapp" target="_blank" rel="noopener noreferrer">Ver producto</a>
+        <button type="button" class="btn-reserve" data-id="g19-18" data-name="Pack de toallas de baño">Reservar</button>
+      </div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
+    </article>
+    <article class="gift-card" data-id="g21-20" data-name="Cojín de lactancia">
+      <div class="gift-icon">🎁</div>
+      <h3>Cojín de lactancia</h3>
+      <p class="desc">“Cojín de lactancia: trono cómodo pa’ mami y pa’ mí, el rey del snack.”</p>
+      <div class="price">$29.990</div>
+      <div class="gift-actions">
+        <a class="btn-link" href="https://www.mercadolibre.cl/up/MLCU4010784599?matt_tool=94515950&amp;pdp_filters=item_id:MLC1976973383&amp;ua=Xa6JbuUG224R5DoBiQWojNK25RNNRCX3_VLbfYm7vAx1OWi6#origin=share&amp;sid=share&amp;wid=MLC1976973383&amp;action=whatsapp" target="_blank" rel="noopener noreferrer">Ver producto</a>
+        <button type="button" class="btn-reserve" data-id="g21-20" data-name="Cojín de lactancia">Reservar</button>
+      </div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
+    </article>
+    <article class="gift-card" data-id="g5-4" data-name="Set cuna colecho">
+      <div class="gift-icon">🎁</div>
+      <h3>Set cuna colecho</h3>
+      <p class="desc">“Sábanitas de colecho pa’ dormir pegadito… y roncar en equipo.”</p>
+      <div class="price">$35.000</div>
+      <div class="gift-actions">
+        <a class="btn-link" href="https://www.mercadolibre.cl/p/MLC66949598?matt_tool=94515950&amp;pdp_filters=item_id:MLC3951906738&amp;ua=B9zOXpOk2dRNNHufD0fdlZmi0FWVMcxB3pMU7La9ZvOCgPC8#origin=share&amp;sid=share&amp;wid=MLC3951906738&amp;action=whatsapp" target="_blank" rel="noopener noreferrer">Ver producto</a>
+        <button type="button" class="btn-reserve" data-id="g5-4" data-name="Set cuna colecho">Reservar</button>
+      </div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
+    </article>
+    <article class="gift-card" data-id="g23-22" data-name="Aspirador Nasal Eléctrico para Bebé (Saca Mocos)">
+      <div class="gift-icon">🎁</div>
+      <h3>Aspirador Nasal Eléctrico para Bebé (Saca Mocos)</h3>
+      <p class="desc">“Saca mocos eléctrico: tecnología pro pa’ respirar como campeón.”</p>
+      
+      <div class="gift-actions">
+        <a class="btn-link" href="https://www.falabella.com/falabella-cl/product/140928208/Aspirador-Nasal-Para-Bebe-Saca-Mocos-Electrico-Limpiador/140928209" target="_blank" rel="noopener noreferrer">Ver producto</a>
+        <button type="button" class="btn-reserve" data-id="g23-22" data-name="Aspirador Nasal Eléctrico para Bebé (Saca Mocos)">Reservar</button>
+      </div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
+    </article>
+    <article class="gift-card" data-id="g26-25" data-name="Bee Bee Juego de Sábanas Colecho Punto Beige">
+      <div class="gift-icon">🎁</div>
+      <h3>Bee Bee Juego de Sábanas Colecho Punto Beige</h3>
+      <p class="desc">“Sábanas punto beige, tiernas como un abrazo (mejores que mi humor a las 3 AM).”</p>
+      
+      <div class="gift-actions">
+        <a class="btn-link" href="https://www.falabella.com/falabella-cl/product/16379704/Bee-Bee-Juego-Sabanas-Colecho-Punto-Beige/16379704" target="_blank" rel="noopener noreferrer">Ver producto</a>
+        <button type="button" class="btn-reserve" data-id="g26-25" data-name="Bee Bee Juego de Sábanas Colecho Punto Beige">Reservar</button>
+      </div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
+    </article>
+    <article class="gift-card" data-id="g10-9" data-name="Bolso Maternal Premium Black Gold">
+      <div class="gift-icon">🎁</div>
+      <h3>Bolso Maternal Premium Black Gold</h3>
+      <p class="desc">“Bolso maternal premium: la mochila de superhéroes de mami, sin drama.”</p>
+      
+      <div class="gift-actions">
+        <a class="btn-link" href="https://www.falabella.com/falabella-cl/product/149733952/bolso-maternal-premium-black-gold/149733953" target="_blank" rel="noopener noreferrer">Ver producto</a>
+        <button type="button" class="btn-reserve" data-id="g10-9" data-name="Bolso Maternal Premium Black Gold">Reservar</button>
+      </div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
+    </article>
+    <article class="gift-card" data-id="g2-1" data-name="Carrito Organizador Metálico 3 Niveles Blanco">
+      <div class="gift-icon">🎁</div>
+      <h3>Carrito Organizador Metálico 3 Niveles Blanco</h3>
+      <p class="desc">“Carrito organizador: porque mis cositas merecen un cuartel general ordenadito.”</p>
+      
+      <div class="gift-actions">
+        <a class="btn-link" href="https://www.falabella.com/falabella-cl/product/139542986/Carrito-Organizador-Metalico-Con-Asa-Ruedas-3-Niveles-Blanco/139542987" target="_blank" rel="noopener noreferrer">Ver producto</a>
+        <button type="button" class="btn-reserve" data-id="g2-1" data-name="Carrito Organizador Metálico 3 Niveles Blanco">Reservar</button>
+      </div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
+    </article>
+    <article class="gift-card" data-id="g29-28" data-name="Chupete Ultra Soft 0-6 Niño Philips Avent">
+      <div class="gift-icon">🎁</div>
+      <h3>Chupete Ultra Soft 0-6 Niño Philips Avent</h3>
+      <p class="desc">“Chupete suavecito: mi botón de ‘calmate un toque’ cuando se pone intense la cosa.”</p>
+      
+      <div class="gift-actions">
+        <a class="btn-link" href="https://www.falabella.com/falabella-cl/product/146246576/Chupete-Ultra-Soft-0-6-Nino-Philips-Avent/146246577" target="_blank" rel="noopener noreferrer">Ver producto</a>
+        <button type="button" class="btn-reserve" data-id="g29-28" data-name="Chupete Ultra Soft 0-6 Niño Philips Avent">Reservar</button>
+      </div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
+    </article>
+    <article class="gift-card" data-id="g3-2" data-name="Colchón de Cuna 70 x 130 x 12 cm">
+      <div class="gift-icon">🎁</div>
+      <h3>Colchón de Cuna 70 x 130 x 12 cm</h3>
+      <p class="desc">“Colchón de cuna: mi nube oficial pa’ crecer (y rebotar un poquitito).”</p>
+      
+      <div class="gift-actions">
+        <a class="btn-link" href="https://drimkip.cl/colchon-de-cuna-70-x-130-x-12cm.html" target="_blank" rel="noopener noreferrer">Ver producto</a>
+        <button type="button" class="btn-reserve" data-id="g3-2" data-name="Colchón de Cuna 70 x 130 x 12 cm">Reservar</button>
+      </div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
+    </article>
+    <article class="gift-card" data-id="g27-26" data-name="Juego de Sábanas Colecho Estrellas Grises">
+      <div class="gift-icon">🎁</div>
+      <h3>Juego de Sábanas Colecho Estrellas Grises</h3>
+      <p class="desc">“Sábanas de estrellitas grises pa’ soñar en grande… o en biberón.”</p>
+      
+      <div class="gift-actions">
+        <a class="btn-link" href="https://www.falabella.com/falabella-cl/product/128374413/JUEGO-DE-SABANAS-COLECHO-ESTRELLAS-GRISES/128374414" target="_blank" rel="noopener noreferrer">Ver producto</a>
+        <button type="button" class="btn-reserve" data-id="g27-26" data-name="Juego de Sábanas Colecho Estrellas Grises">Reservar</button>
+      </div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
+    </article>
+    <article class="gift-card" data-id="g25-24" data-name="Juego de Sábanas Cuna Colecho Bebé">
+      <div class="gift-icon">🎁</div>
+      <h3>Juego de Sábanas Cuna Colecho Bebé</h3>
+      <p class="desc">“Sábanas colecho pa’ mis noches VIP al ladito de mis papis.”</p>
+      
+      <div class="gift-actions">
+        <a class="btn-link" href="https://www.falabella.com/falabella-cl/product/137955281/Juego-de-sabana-cuna-colecho-bebe/137955282" target="_blank" rel="noopener noreferrer">Ver producto</a>
+        <button type="button" class="btn-reserve" data-id="g25-24" data-name="Juego de Sábanas Cuna Colecho Bebé">Reservar</button>
+      </div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
+    </article>
+    <article class="gift-card" data-id="g16-15" data-name="Manta / Frazada Polar para Bebés">
+      <div class="gift-icon">🎁</div>
+      <h3>Manta / Frazada Polar para Bebés</h3>
+      <p class="desc">“Frazada polar pa’ los fríos de Talca. Yo soy delicado de nube, digamos.”</p>
+      
+      <div class="gift-actions">
+        <a class="btn-link" href="https://www.falabella.com/falabella-cl/product/147969186/Manta-Frazada-Cobija-Polar-Para-Bebes/147969189" target="_blank" rel="noopener noreferrer">Ver producto</a>
+        <button type="button" class="btn-reserve" data-id="g16-15" data-name="Manta / Frazada Polar para Bebés">Reservar</button>
+      </div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
+    </article>
+    <article class="gift-card" data-id="g17-16" data-name="Manta Regalería Niño Celeste">
+      <div class="gift-icon">🎁</div>
+      <h3>Manta Regalería Niño Celeste</h3>
+      <p class="desc">“Manta celeste de foto oficial: si salgo lindo, fue con ayuda profesional.”</p>
+      
+      <div class="gift-actions">
+        <a class="btn-link" href="https://www.opaline.cl/manta-regaleria-nino-celeste-mnpl0340i25/p" target="_blank" rel="noopener noreferrer">Ver producto</a>
+        <button type="button" class="btn-reserve" data-id="g17-16" data-name="Manta Regalería Niño Celeste">Reservar</button>
+      </div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
+    </article>
+    <article class="gift-card" data-id="g12-11" data-name="Manta de Algodón Café">
+      <div class="gift-icon">🎁</div>
+      <h3>Manta de Algodón Café</h3>
+      <p class="desc">“Manta de algodón café: modo burrito osito, bien apretadito.”</p>
+      
+      <div class="gift-actions">
+        <a class="btn-link" href="https://www.falabella.com/falabella-cl/product/148487017/manta-algodon-cafe/149835148" target="_blank" rel="noopener noreferrer">Ver producto</a>
+        <button type="button" class="btn-reserve" data-id="g12-11" data-name="Manta de Algodón Café">Reservar</button>
+      </div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
+    </article>
+    <article class="gift-card" data-id="g7-6" data-name="Monitor Digital Portátil">
+      <div class="gift-icon">🎁</div>
+      <h3>Monitor Digital Portátil</h3>
+      <p class="desc">“Monitor portátil: pa’ que vean que no pasaba nada… solo ensayaba caras raras.”</p>
+      
+      <div class="gift-actions">
+        <a class="btn-link" href="https://bebesit.cl/products/monitor-digital-portatil" target="_blank" rel="noopener noreferrer">Ver producto</a>
+        <button type="button" class="btn-reserve" data-id="g7-6" data-name="Monitor Digital Portátil">Reservar</button>
+      </div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
+    </article>
+    <article class="gift-card" data-id="g9-8" data-name="Mudador Portátil">
+      <div class="gift-icon">🎁</div>
+      <h3>Mudador Portátil</h3>
+      <p class="desc">“Mudador portátil: base de operaciones móvil cuando se pone colorida la cosa.”</p>
+      
+      <div class="gift-actions">
+        <a class="btn-link" href="https://www.simplegracia.cl/products/mudador-portatil" target="_blank" rel="noopener noreferrer">Ver producto</a>
+        <button type="button" class="btn-reserve" data-id="g9-8" data-name="Mudador Portátil">Reservar</button>
+      </div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
+    </article>
+    <article class="gift-card" data-id="g30-29" data-name="Pack x3 Tutos de Algodón Bebesit">
+      <div class="gift-icon">🎁</div>
+      <h3>Pack x3 Tutos de Algodón Bebesit</h3>
+      <p class="desc">“Tres tutitos pa’ abrazar cuando extrañe la pancita… mi ex departamento.”</p>
+      
+      <div class="gift-actions">
+        <a class="btn-link" href="https://www.falabella.com/falabella-cl/product/80759469/pack-x3-tutos-algodon-bebesit/80759469" target="_blank" rel="noopener noreferrer">Ver producto</a>
+        <button type="button" class="btn-reserve" data-id="g30-29" data-name="Pack x3 Tutos de Algodón Bebesit">Reservar</button>
+      </div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
+    </article>
+    <article class="gift-card" data-id="g8-7" data-name="Porta Bebé B009R Gris">
+      <div class="gift-icon">🎁</div>
+      <h3>Porta Bebé B009R Gris</h3>
+      <p class="desc">“Porta bebé gris pa’ salir pegadito y saludar al mundo desde la altura.”</p>
+      
+      <div class="gift-actions">
+        <a class="btn-link" href="https://www.baby-planet.cl/products/porta-bebe-b009r-grey" target="_blank" rel="noopener noreferrer">Ver producto</a>
+        <button type="button" class="btn-reserve" data-id="g8-7" data-name="Porta Bebé B009R Gris">Reservar</button>
+      </div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
+    </article>
+    <article class="gift-card" data-id="g18-17" data-name="Saco de Dormir Unisex">
+      <div class="gift-icon">🎁</div>
+      <h3>Saco de Dormir Unisex</h3>
+      <p class="desc">“Saco de dormir pa’ que mi colita no se vaya de gira a las 3 AM.”</p>
+      
+      <div class="gift-actions">
+        <a class="btn-link" href="https://www.opaline.cl/saco-de-dormir-unisex/p" target="_blank" rel="noopener noreferrer">Ver producto</a>
+        <button type="button" class="btn-reserve" data-id="g18-17" data-name="Saco de Dormir Unisex">Reservar</button>
+      </div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
+    </article>
+    <article class="gift-card" data-id="g6-5" data-name="Set 2 Sacaleche / Extractor de Leche Materna con Control Remoto + 10 Bolsas">
+      <div class="gift-icon">🎁</div>
+      <h3>Set 2 Sacaleche / Extractor de Leche Materna con Control Remoto + 10 Bolsas</h3>
+      <p class="desc">“Extractor pa’ mami: así nunca me falta mi superpoder lechoso.”</p>
+      
+      <div class="gift-actions">
+        <a class="btn-link" href="https://bebesit.cl/products/set-2-sacaleche-extractor-leche-materna-control-remoto-10-bolsas" target="_blank" rel="noopener noreferrer">Ver producto</a>
+        <button type="button" class="btn-reserve" data-id="g6-5" data-name="Set 2 Sacaleche / Extractor de Leche Materna con Control Remoto + 10 Bolsas">Reservar</button>
+      </div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
+    </article>
+    <article class="gift-card" data-id="g1-0" data-name="Silla Mecedora Tavia Beige">
+      <div class="gift-icon">🎁</div>
+      <h3>Silla Mecedora Tavia Beige</h3>
+      <p class="desc">“Silla mecedora beige: el trono de mimos, cantitos y siestas en familia.”</p>
+      
+      <div class="gift-actions">
+        <a class="btn-link" href="https://www.relan.cl/products/silla-mecedora-tavia-beige" target="_blank" rel="noopener noreferrer">Ver producto</a>
+        <button type="button" class="btn-reserve" data-id="g1-0" data-name="Silla Mecedora Tavia Beige">Reservar</button>
+      </div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
+    </article>
+    <article class="gift-card" data-id="g28-27" data-name="Sábanas 300 Hilos Cuna Evolutiva 70x140 cm - Beige">
+      <div class="gift-icon">🎁</div>
+      <h3>Sábanas 300 Hilos Cuna Evolutiva 70x140 cm - Beige</h3>
+      <p class="desc">“Sábanas beige suavecitas: mi cuna evolutiva merece su hotel cinco estrellas.”</p>
+      
+      <div class="gift-actions">
+        <a class="btn-link" href="https://www.carestino.cl/producto/sabanas-300-hilos-para-cuna-evolutiva-de-70x140cm-beige/" target="_blank" rel="noopener noreferrer">Ver producto</a>
+        <button type="button" class="btn-reserve" data-id="g28-27" data-name="Sábanas 300 Hilos Cuna Evolutiva 70x140 cm - Beige">Reservar</button>
+      </div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
+    </article>
+    <article class="gift-card" data-id="g4-3" data-name="Sábanas 300 Hilos Cuna Evolutiva 70x140 cm - Blanco">
+      <div class="gift-icon">🎁</div>
+      <h3>Sábanas 300 Hilos Cuna Evolutiva 70x140 cm - Blanco</h3>
+      <p class="desc">“Sábanas blancas 300 hilos: sueño de príncipe… con horario de farra nocturna.”</p>
+      
+      <div class="gift-actions">
+        <a class="btn-link" href="https://www.carestino.cl/producto/sabanas-300-hilos-para-cuna-evolutiva-de-70x140cm-blanco/" target="_blank" rel="noopener noreferrer">Ver producto</a>
+        <button type="button" class="btn-reserve" data-id="g4-3" data-name="Sábanas 300 Hilos Cuna Evolutiva 70x140 cm - Blanco">Reservar</button>
+      </div>
+      <div class="reserved-panel reserved-badge" hidden>
+        <div class="rp-top"><span class="rp-check">✓</span><span class="rp-label">Reservado</span></div>
+        <div class="rp-name"></div>
+      </div>
+    </article></section>
     <footer>Con cariño, para la llegada de Facundo</footer>
   </div>
 
   <div class="modal-backdrop" id="modal" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-      <h2 id="modalTitle">Reservar regalo</h2>
+    <div class="modal" role="dialog" aria-modal="true">
+      <h2>Reservar regalo</h2>
       <div class="gift-name" id="modalGift"></div>
       <form id="reserveForm">
         <label for="name">Tu nombre</label>
-        <input id="name" name="name" type="text" required autocomplete="name" placeholder="Ej: Camila Rojas" />
+        <input id="name" name="name" type="text" required="" autocomplete="name" placeholder="Ej: Camila Rojas">
         <label for="email">Tu correo</label>
-        <input id="email" name="email" type="email" required autocomplete="email" placeholder="Ej: camila@email.com" />
+        <input id="email" name="email" type="email" required="" autocomplete="email" placeholder="Ej: camila@email.com">
         <div class="msg" id="formMsg"></div>
         <div class="modal-actions">
           <button type="button" class="btn-ghost" id="cancelBtn">Cancelar</button>
@@ -876,8 +607,6 @@
   </div>
   <div class="toast" id="toast"></div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/config.js"></script>
   <script>
     (function () {
       var cfg = window.BABY_SHOWER_CONFIG || {};
@@ -936,12 +665,10 @@
           }
         });
         var available = cards.length - reservedCount;
-        var warn = configReady() ? '' : ' <span class="stat-chip">Config pendiente</span>';
         stats.innerHTML =
           '<span class="stat-chip"><strong>' + available + '</strong> disponibles</span>' +
           '<span class="stat-chip reserved"><strong>' + reservedCount + '</strong> reservados</span>' +
-          '<span class="stat-chip"><strong>' + cards.length + '</strong> en total</span>' +
-          warn;
+          '<span class="stat-chip"><strong>' + cards.length + '</strong> en total</span>';
       }
 
       async function refreshReservations() {
@@ -964,25 +691,19 @@
       }
 
       async function notifyFormspree(payload) {
-        if (!cfg.FORMSPREE_ENDPOINT || cfg.FORMSPREE_ENDPOINT.indexOf('PEGAR_') === 0) {
-          return;
-        }
+        if (!cfg.FORMSPREE_ENDPOINT || cfg.FORMSPREE_ENDPOINT.indexOf('PEGAR_') === 0) return;
         try {
           await fetch(cfg.FORMSPREE_ENDPOINT, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Accept: 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
             body: JSON.stringify({
               name: payload.guest_name,
               email: payload.guest_email,
               gift: payload.gift_name,
               gift_id: payload.gift_id,
               _subject: 'Nueva reserva Baby Shower Facundo: ' + payload.gift_name,
-              _cc: cfg.NOTIFY_CC || 'vicentesanmartin.fre@gmail.com,gabrielasandovalarce@gmail.com',
-              message:
-                payload.guest_name + ' (' + payload.guest_email + ') reservó: ' + payload.gift_name
+              _cc: cfg.NOTIFY_CC || 'vicentesanmartin.fre@gmail.com',
+              message: payload.guest_name + ' (' + payload.guest_email + ') reservó: ' + payload.gift_name
             })
           });
         } catch (err) {
@@ -1040,13 +761,11 @@
           formMsg.className = 'msg error';
           return;
         }
-
         if (!supabaseClient) {
           formMsg.textContent = 'Falta configurar Supabase en js/config.js';
           formMsg.className = 'msg error';
           return;
         }
-
         if (reservationMap[selectedId]) {
           formMsg.textContent = 'Este regalo ya fue reservado.';
           formMsg.className = 'msg error';
@@ -1067,7 +786,6 @@
         };
 
         var insert = await supabaseClient.from('reservations').insert([payload]).select().single();
-
         if (insert.error) {
           busy = false;
           confirmBtn.disabled = false;
@@ -1092,9 +810,8 @@
       search.addEventListener('input', function () {
         var q = (search.value || '').toLowerCase().trim();
         grid.querySelectorAll('.gift-card').forEach(function (card) {
-          var giftName = (card.getAttribute('data-name') || '').toLowerCase();
           var text = card.textContent.toLowerCase();
-          card.style.display = (!q || giftName.indexOf(q) >= 0 || text.indexOf(q) >= 0) ? '' : 'none';
+          card.style.display = (!q || text.indexOf(q) >= 0) ? '' : 'none';
         });
       });
 
@@ -1106,5 +823,6 @@
       setInterval(refreshReservations, 15000);
     })();
   </script>
-</body>
-</html>
+
+
+</body></html>
